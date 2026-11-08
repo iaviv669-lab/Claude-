@@ -1,0 +1,4 @@
+__pycache__/
+*.pyc
+.photo_index.json
+review*.html
