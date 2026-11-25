@@ -14,8 +14,8 @@ export default defineConfig(({ mode }) => ({
           registerType: 'prompt',
           includeAssets: ['icon.svg'],
           manifest: {
-            name: 'Repwise',
-            short_name: 'Repwise',
+            name: 'Setkeeper',
+            short_name: 'Setkeeper',
             description: 'Your own workout logger. Works offline, keeps data on your device.',
             theme_color: '#0e1013',
             background_color: '#0e1013',

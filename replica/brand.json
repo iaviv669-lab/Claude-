@@ -1,0 +1,17 @@
+{
+  "name": "Setkeeper",
+  "avoid": [
+    "MacroFactor",
+    "Macro Factor",
+    "Stronger By Science",
+    "Stronger by Science Technologies",
+    "Jeff Nippard",
+    "Nippard"
+  ],
+  "domains": [
+    "macrofactorapp.com",
+    "macrofactor.com",
+    "strongerbyscience.com"
+  ],
+  "colors": []
+}

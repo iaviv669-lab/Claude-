@@ -11,9 +11,9 @@
   --border-input: 125 133 144;
   --text: 18 20 23;
   --muted: 89 97 108;
-  --accent: 47 91 234;
+  --accent: 91 63 217;
   --on-accent: 255 255 255;
-  --accent-soft: 230 236 253;
+  --accent-soft: 236 232 253;
   --danger: 194 45 45;
   --success: 29 117 71;
   --success-soft: 227 243 234;
@@ -30,9 +30,9 @@
   --border-input: 122 130 142;
   --text: 242 244 247;
   --muted: 163 171 182;
-  --accent: 111 147 255;
-  --on-accent: 11 16 36;
-  --accent-soft: 28 38 71;
+  --accent: 165 148 255;
+  --on-accent: 18 10 51;
+  --accent-soft: 37 28 77;
   --danger: 255 107 107;
   --success: 76 201 138;
   --success-soft: 20 48 31;

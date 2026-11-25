@@ -197,7 +197,7 @@ export function UiHost() {
   const close = (v: boolean) => { c?.resolve(v); useUi.setState({ confirm: null }); };
   return (
     <>
-      <div aria-live="polite" className="pointer-events-none fixed inset-x-0 bottom-24 z-[60] flex justify-center px-4">
+      <div aria-live="polite" className="pointer-events-none fixed inset-x-0 top-16 z-[60] flex justify-center px-4">
         {t ? (
           <div className="pointer-events-auto flex max-w-app items-center gap-3 rounded-md bg-text px-4 py-3 text-sm text-bg shadow-pop">
             <span>{t.msg}</span>

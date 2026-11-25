@@ -1,0 +1,94 @@
+# Brand: Setkeeper
+
+Angle (from `fixes.md`): for lifters who already have a plan, the fastest, most reliable
+logger. Every set saved on your phone the moment you tap it, no account.
+Tagline: **Your plan. Every set, saved. No account.**
+
+## Name
+
+20 candidates: Repwise, Setwell, Ironleaf, Barline, Chalkline, **Setkeeper**, Repkeep, Liftledger,
+Notchbook, Loadline, Ironquill, Gripwell, Tallyset, Steadyset, Liftmark, Setpiece, Ironnote,
+Hearth, Kettle, Plateline, Barnote.
+
+Filters: nothing that sounds, looks or means like the original ("macro", "factor", science/strength
+puns are out); short; spellable; fits the angle. The App Store search (run 2026-11-25, US store,
+`itunes.apple.com/search`) knocked out most of them:
+
+| name | App Store apps using the name (run 2026-11-25) | verdict |
+| --- | --- | --- |
+| Repwise | 8, mostly workout trackers | **out** (was the placeholder) |
+| Liftledger | 5 workout logs | out |
+| Ironquill, Ironnote, Barline, Steadyset, Liftmark, Plateline, Setwell, Ironleaf | 1–3 each, mostly workout apps | out |
+| **Setkeeper** | 0 | **chosen** |
+| Repkeep | 0 | backup |
+| Tallyset | 0 | backup |
+| Gripwell | 0 exact, but crowded fitness results | backup |
+
+Remaining checks for the shortlist, **to run** (this environment can't reach these sites):
+
+| check | Setkeeper | Repkeep | Tallyset |
+| --- | --- | --- | --- |
+| US trademark (tmsearch.uspto.gov, classes 9, 42) | to run | to run | to run |
+| EU (euipo eSearch / TMview) | to run | to run | to run |
+| WIPO Global Brand Database | to run | to run | to run |
+| domain (.com / .app) | to run | to run | to run |
+| Google Play | to run | to run | to run |
+| handles (X, Instagram, TikTok, GitHub) | to run | to run | to run |
+| web search "name workout app" | to run | to run | to run |
+
+For a personal app none of this blocks you. If you ever publish it, run these and ask a trademark
+lawyer before spending money on the name.
+
+## Palette
+
+Primary hue moved from the build-time placeholder blue to **violet**, its own family. Roles unchanged:
+
+| role | light | dark |
+| --- | --- | --- |
+| accent | #5b3fd9 | #a594ff |
+| on-accent | #ffffff | #120a33 |
+| accent-soft | #ece8fd | #251c4d |
+| neutrals, danger, success, warning | unchanged from `tokens*.json` | |
+
+`contrast.py`: 0 AA failures in light (17 pairs) and dark (18 pairs).
+The original's brand colours were never measured (no screenshots), so `brand.json` lists none.
+The name and domain sweep is what guards against leftovers.
+
+## Logo brief
+
+- Idea: a **keeper's tally**: four short vertical strokes crossed by one, drawn as plates on a bar
+  (sets counted, nothing lost).
+- Mark: symbol + wordmark; the symbol alone is the app icon.
+- Must work at 16px (favicon: the tally alone, 2 colours) and 1024px (app icon, violet on near-black, no transparency).
+- Deliverables: SVG mark + wordmark, 1024×1024 icon (iOS, opaque), favicon 16/32/48 + SVG, 192/512 PWA icons (maskable), 1200×630 social image.
+- Must not resemble the original's mark: no shared shape, colour pair or letterform trick; check side by side.
+- Current placeholder icon: our own dumbbell glyph in the new violet (`app/public/icon.svg`).
+
+## Voice
+
+**Plain, not dumbed down. Calm, not cheerleading. Brief, not curt.**
+
+| do | don't |
+| --- | --- |
+| "Enter reps first" | "Oops! Looks like you forgot something 😅" |
+| "Workout paused. The clock is stopped." | "Taking a breather? 💪" |
+| "Hidden (it’s in your history)" | "Error: cannot delete referenced entity" |
+| Explain jargon once, in a sheet ("RIR: reps in reserve") | Assume everyone knows RIR, RPE, e1RM |
+| Numbers first ("62.5 kg · 20 + 1.25 per side") | Paragraphs before the number |
+
+Most-seen strings (all written fresh for this app, none from the original):
+1. Onboarding: "Start training" · "No account. Everything is stored on this device; export a backup from Settings."
+2. Empty home: "No saved workouts yet". "Save the workouts you repeat, or just start a quick one and add exercises as you go."
+3. Main button: "Start workout" / "Resume workout"
+4. Logger empty: "Add your first exercise". "Pick what you’re training. Sets from last time fill in automatically."
+5. Tick without reps: "Enter reps first"
+6. Finish with unticked sets: "Finish workout?" "3 unticked sets will be removed."
+7. Summary: "Workout done" · "New records"
+8. Discard: "Discard workout?" "Everything logged in this session will be deleted."
+9. Rest: "You’ll get a buzz and a beep when rest is over."
+10. Storage error: "Storage is unavailable". "This browser blocked on-device storage… Open the app in a normal window."
+
+## Sweep
+
+`python3 sweep.py . --config replica/brand.json` → **Clean** (2026-11-25), on `app/` and the whole repo.
+By eye: page title, PWA manifest name, favicon and backup file names all say Setkeeper.

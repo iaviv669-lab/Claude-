@@ -769,12 +769,12 @@ const TABLES = ['settings', 'exercises', 'gyms', 'programs', 'workouts', 'workou
 export async function exportJSON(): Promise<string> {
   const data: Record<string, unknown[]> = {};
   for (const t of TABLES) data[t] = await db.table(t).toArray();
-  return JSON.stringify({ app: 'repwise', version: 1, exportedAt: new Date().toISOString(), data });
+  return JSON.stringify({ app: 'setkeeper', version: 1, exportedAt: new Date().toISOString(), data });
 }
 
 export async function importJSON(text: string): Promise<Record<string, number>> {
   const parsed = JSON.parse(text);
-  if (parsed?.app !== 'repwise' || parsed.version !== 1 || typeof parsed.data !== 'object') throw new Error('This file is not a Repwise backup.');
+  if (!['setkeeper', 'repwise'].includes(parsed?.app) || parsed.version !== 1 || typeof parsed.data !== 'object') throw new Error('This file is not a Setkeeper backup.');
   for (const t of TABLES) if (!Array.isArray(parsed.data[t] ?? [])) throw new Error(`Backup table "${t}" is malformed.`);
   const counts: Record<string, number> = {};
   await db.transaction('rw', TABLES.map((t) => db.table(t)), async () => {
