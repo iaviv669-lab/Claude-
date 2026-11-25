@@ -63,18 +63,18 @@ export function Wordmark({{ height = 20, className = '' }}: {{ height?: number; 
   return <svg height={{height}} viewBox={{WORDMARK_VIEWBOX}} className={{className}} role="img" aria-label="Ironrow"><path d={{WORDMARK_PATH}} fill="currentColor" fillRule="evenodd" /></svg>;
 }}
 
-/** The app icon: the barbell on the dark purple gradient. */
+/** The app icon: a purple-gradient barbell on black. */
 export function AppIcon({{ size = 48, className = '' }}: {{ size?: number; className?: string }}) {{
   return (
     <svg width={{size}} height={{size}} viewBox="0 0 512 512" className={{className}} aria-hidden>
-      <defs><linearGradient id="ir-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#5a2fd6" /><stop offset=".55" stopColor="#2a1173" /><stop offset="1" stopColor="#0e0826" /></linearGradient></defs>
-      <rect width="512" height="512" rx="112" fill="url(#ir-g)" />
-      <path d={{MARK_PATH}} fill="#ffffff" />
+      <defs><linearGradient id="ir-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#b9a4ff" /><stop offset=".55" stopColor="#7a4cf5" /><stop offset="1" stopColor="#5a2fd6" /></linearGradient></defs>
+      <rect width="512" height="512" rx="112" fill="#0a0a0c" />
+      <path d={{MARK_PATH}} fill="url(#ir-g)" />
     </svg>
   );
 }}
 '''
 pathlib.Path('src/components/Logo.tsx').write_text(tsx)
-icon = f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#5a2fd6"/><stop offset=".55" stop-color="#2a1173"/><stop offset="1" stop-color="#0e0826"/></linearGradient></defs><rect width="512" height="512" rx="112" fill="url(#g)"/><path d="{mark_d}" fill="#ffffff"/></svg>'''
+icon = f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#b9a4ff"/><stop offset=".55" stop-color="#7a4cf5"/><stop offset="1" stop-color="#5a2fd6"/></linearGradient></defs><rect width="512" height="512" rx="112" fill="#0a0a0c"/><path d="{mark_d}" fill="url(#g)"/></svg>'''
 pathlib.Path('public/icon.svg').write_text(icon)
 print('wordmark width', round(width, 1), 'paths', len(word_d))

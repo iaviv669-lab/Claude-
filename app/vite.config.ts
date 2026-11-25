@@ -17,8 +17,8 @@ export default defineConfig(({ mode }) => ({
             name: 'Ironrow',
             short_name: 'Ironrow',
             description: 'Your own workout logger. Works offline, keeps data on your device.',
-            theme_color: '#1a0b45',
-            background_color: '#1a0b45',
+            theme_color: '#0a0a0c',
+            background_color: '#0a0a0c',
             display: 'standalone',
             start_url: './',
             icons: [
