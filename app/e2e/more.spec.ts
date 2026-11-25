@@ -240,6 +240,7 @@ test('workout reminders produce a calendar file for the weekly plan', async ({ p
   await page.getByRole('link', { name: 'Settings' }).click();
   await expect(page.getByText('Mon Upper 1')).toBeVisible();
   await page.getByLabel('Workout time').fill('18:30');
+  await page.getByText('Or use calendar reminders').click();
   const dl = page.waitForEvent('download');
   await page.getByRole('button', { name: 'Add reminders to Calendar' }).click();
   const file = await (await dl).path();

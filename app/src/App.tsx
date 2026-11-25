@@ -129,6 +129,8 @@ export function App() {
   useEffect(() => {
     ensureSeeded().then(() => setReady(true)).catch((e) => setErr(String(e?.message ?? e)));
     navigator.storage?.persist?.().catch(() => {});
+    // keep push reminders in step with the plan (no-op when notifications are off)
+    import('./lib/push').then((m) => m.syncPush()).catch(() => {});
   }, []);
   if (err) return <div className="p-6"><h1 className="text-lg">Storage is unavailable</h1><p className="mt-2 text-sm text-muted">This browser blocked on-device storage ({err}). Private browsing modes often do this. Open the app in a normal window.</p></div>;
   if (!ready) return <div className="flex h-full items-center justify-center text-muted">Loading…</div>;

@@ -12,7 +12,8 @@ export default defineConfig(({ mode }) => ({
       ? viteSingleFile()
       : VitePWA({
           registerType: 'autoUpdate',
-          includeAssets: ['icon.svg', 'apple-touch-icon.png'],
+          workbox: { importScripts: ['push-sw.js'] },
+          includeAssets: ['icon.svg', 'apple-touch-icon.png', 'push-sw.js'],
           manifest: {
             name: 'Ironrow',
             short_name: 'Ironrow',

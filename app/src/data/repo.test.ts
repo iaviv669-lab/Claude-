@@ -251,3 +251,20 @@ describe('my plan template', () => {
     expect(t.exercises[1].sets.length).toBe(2);
   });
 });
+
+import { buildReminders } from '../lib/push';
+describe('push reminder schedule', () => {
+  it('one reminder per workout day, shifted by the lead time (across midnight too)', async () => {
+    const wid = await r.saveWorkout({ name: 'Upper 1', gymId: null }, [r.defaultItem('x-pec-deck'), r.defaultItem('x-cable-curl')]);
+    const pid = await r.saveProgram({ name: 'Week', days: [wid, null, null, wid, null, null, null] });
+    await r.setActiveProgram(pid);
+    expect(await buildReminders('17:30', 15)).toEqual([
+      { id: 'd0', weekday: 0, time: '17:15', title: 'Upper 1 today', body: 'Starts at 17:30. Pec Deck, Cable Curl' },
+      { id: 'd3', weekday: 3, time: '17:15', title: 'Upper 1 today', body: 'Starts at 17:30. Pec Deck, Cable Curl' },
+    ]);
+    const early = await buildReminders('00:30', 60);
+    expect(early.map((x) => [x.weekday, x.time])).toEqual([[6, '23:30'], [2, '23:30']]);
+    await r.saveProgram({ id: pid, name: 'Week', days: [wid, null, wid] }); // not weekly
+    expect(await buildReminders('17:30', 0)).toEqual([]);
+  });
+});

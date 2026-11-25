@@ -1,0 +1,15 @@
+name = "ironrow-push"
+main = "src/index.ts"
+compatibility_date = "2024-09-23"
+workers_dev = true
+
+# every 5 minutes: send the reminders that are due
+[triggers]
+crons = ["*/5 * * * *"]
+
+[vars]
+VAPID_PUBLIC_KEY = "BIEqVJWn7gkqFHlIkd4oquFMQSQEle7iw7bieG5GR-t87BnF2vtYBlMfprhkEeBp2UxtR0QsTxqlsqRv_Cs8HO4"
+VAPID_SUBJECT = "https://iaviv669-lab.github.io/Claude-/"
+ALLOWED_ORIGINS = "https://iaviv669-lab.github.io,http://localhost:4173,http://localhost:5173"
+# VAPID_PRIVATE_KEY is a secret (wrangler secret put); never committed
+# KV namespace binding SUBS is added by the deploy step
