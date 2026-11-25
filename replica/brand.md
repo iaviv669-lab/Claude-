@@ -73,7 +73,7 @@ The name and domain sweep is what guards against leftovers.
 
 Six drafts in `design/logo-directions.png`: A Ascent, B IR monogram, C The plate, D Logbook rows, E Loaded bar, F wordmark with plate O's.
 
-**Chosen: C + F.** The plate is the app icon, white on the brand gradient (135°: #5a2fd6 → #2a1173 → #0e0826); the IRONROW wordmark with plate O's is used on the welcome screen and the home header. Letters are outlined from Inter Display Black (SIL Open Font License) so no font loads at runtime. Source of truth: `app/scripts/make-logo.py` → `app/src/components/Logo.tsx`, `app/public/icon.svg`; PNG icons rendered from the SVG.
+**Chosen: C + F, then the icon changed to a barbell (owner's request).** A level side-view barbell (sleeves, two plates a side, collars) is the app icon, white on the brand gradient (135°: #5a2fd6 → #2a1173 → #0e0826); the IRONROW wordmark with plate O's is used on the welcome screen and the home header. Letters are outlined from Inter Display Black (SIL Open Font License) so no font loads at runtime. Source of truth: `app/scripts/make-logo.py` → `app/src/components/Logo.tsx`, `app/public/icon.svg`; PNG icons rendered from the SVG.
 
 ## Logo brief
 
