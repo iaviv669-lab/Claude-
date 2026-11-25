@@ -291,6 +291,28 @@ export async function nextProgramWorkout(program: Program): Promise<Id | null> {
   return days[(idx + 1) % days.length];
 }
 
+/** Create a program (and its workouts) from a template and make it the active program. */
+export async function addProgramFromTemplate(t: import('./templates').ProgramTemplate): Promise<{ programId: Id; missing: Id[] }> {
+  await ensureSeeded();
+  const settings = await getSettings();
+  const missing: Id[] = [];
+  const workoutIds: Id[] = [];
+  for (const w of t.workouts) {
+    const items: ItemDraft[] = [];
+    for (const exId of w.exercises) {
+      const ex = await db.exercises.get(exId);
+      if (!ex) { missing.push(exId); continue; }
+      const p = ex.type.startsWith('compound') ? t.compound : t.isolation;
+      items.push({ exerciseId: exId, supersetGroup: null, targetSets: p.sets, repMin: p.repMin, repMax: p.repMax, targetRir: p.rir, restSec: p.restSec });
+    }
+    workoutIds.push(await saveWorkout({ name: w.name, gymId: settings.activeGymId }, items));
+  }
+  const programId = await saveProgram({ name: t.name, days: t.week.map((i) => (i == null ? null : workoutIds[i])) });
+  await db.workouts.bulkUpdate(workoutIds.map((id) => ({ key: id, changes: { programId } })));
+  await setActiveProgram(programId);
+  return { programId, missing };
+}
+
 // ---------- sessions ----------
 
 export async function getActiveSession(): Promise<Session | undefined> {

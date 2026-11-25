@@ -219,3 +219,35 @@ describe('exercise library', () => {
     expect(await db.exercises.where('id').startsWith('g-').count()).toBeGreaterThan(400);
   });
 });
+
+import { MY_PLAN } from './templates';
+describe('my plan template', () => {
+  it('creates the 7-day Upper/Upper/Legs program with the right targets', async () => {
+    const { programId, missing } = await r.addProgramFromTemplate(MY_PLAN);
+    expect(missing).toEqual([]);
+    const p = (await db.programs.get(programId))!;
+    expect(p.active).toBe(1);
+    expect(p.days.length).toBe(7);
+    expect(p.days.map((d) => (d ? 'W' : '-')).join('')).toBe('W--W-W-');
+    const names = await Promise.all(p.days.filter(Boolean).map(async (d) => (await db.workouts.get(d!))!.name));
+    expect(names).toEqual(['Upper 1', 'Upper 2', 'Legs']);
+    const counts: number[] = [];
+    for (const d of p.days.filter(Boolean)) {
+      const w = (await r.getWorkout(d!))!;
+      counts.push(w.items.length);
+      for (const it of w.items) {
+        const ex = (await db.exercises.get(it.exerciseId))!;
+        const compound = ex.type.startsWith('compound');
+        expect([it.targetSets, it.repMin, it.repMax, it.restSec, it.targetRir]).toEqual(compound ? [3, 4, 10, 150, null] : [2, 4, 10, 120, null]);
+      }
+    }
+    expect(counts).toEqual([8, 9, 8]);
+    // rest used in a session comes from the plan
+    const sid = await r.startSession(p.days[0]!);
+    const t = (await r.getSessionTree(sid))!;
+    expect(await r.restFor(t.exercises[0].se.id)).toBe(150); // incline DB press (compound)
+    expect(await r.restFor(t.exercises[1].se.id)).toBe(120); // pec deck (isolation)
+    expect(t.exercises[0].sets.length).toBe(3);
+    expect(t.exercises[1].sets.length).toBe(2);
+  });
+});

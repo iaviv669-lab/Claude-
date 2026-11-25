@@ -6,6 +6,7 @@ import { getActiveSession, nextProgramWorkout, startSession } from '../data/repo
 import { Button, Card, Empty, Header, Page, SectionTitle } from '../components/ui';
 import { Wordmark } from '../components/Logo';
 import { fmtDate } from '../lib/time';
+import { DAY_NAMES } from '../data/templates';
 
 export function WorkoutTab() {
   const nav = useNavigate();
@@ -42,15 +43,21 @@ export function WorkoutTab() {
             <div className="space-y-2">
               {program.days.map((d, i) => {
                 const w = d ? byId.get(d) : undefined;
-                const isNext = d && d === next;
+                const weekly = program.days.length === 7;
+                const today = (new Date().getDay() + 6) % 7; // Mon = 0
+                // weekly plans: today's workout, or on a rest day the next one this week (wrapping to next week)
+                const weeklyTarget = weekly ? [...Array(7).keys()].map((k) => (today + k) % 7).find((k) => program.days[k]) : undefined;
+                const isNext = weekly ? i === weeklyTarget : d && d === next;
+                const badge = weekly && i === today ? 'Today' : 'Next';
+                const dayLabel = weekly ? DAY_NAMES[i] : `Day ${i + 1}`;
                 return w ? (
                   <Card as="button" key={i} onClick={() => nav(`/workout/${w.id}`)} className={`flex w-full items-center gap-3 ${isNext ? 'border-accent' : ''}`}>
-                    <span className="w-10 text-xs text-muted">Day {i + 1}</span>
+                    <span className="w-10 text-xs text-muted">{dayLabel}</span>
                     <span className="flex-1"><span className="block font-semibold">{w.name}</span><span className="text-xs text-muted">{count(w.id)} exercises{lastByWorkout?.get(w.id) ? ` · last ${fmtDate(lastByWorkout.get(w.id)!)}` : ''}</span></span>
-                    {isNext ? <span className="rounded-full bg-accent px-2 py-0.5 text-xs font-semibold text-on-accent">Next</span> : <ChevronRight size={18} className="text-muted" />}
+                    {isNext ? <span className="rounded-full bg-accent px-2 py-0.5 text-xs font-semibold text-on-accent">{badge}</span> : <ChevronRight size={18} className="text-muted" />}
                   </Card>
                 ) : (
-                  <div key={i} className="flex items-center gap-3 rounded-lg border border-dashed border-border px-4 py-3 text-sm text-muted"><span className="w-10 text-xs">Day {i + 1}</span>Rest</div>
+                  <div key={i} className="flex items-center gap-3 rounded-lg border border-dashed border-border px-4 py-3 text-sm text-muted"><span className="w-10 text-xs">{dayLabel}</span>Rest</div>
                 );
               })}
             </div>

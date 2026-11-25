@@ -5,6 +5,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { Plus, Trash2, X } from 'lucide-react';
 import { db, type Program } from '../data/schema';
 import * as repo from '../data/repo';
+import { DAY_NAMES } from '../data/templates';
 import { Button, Card, Field, Header, IconButton, Page, SectionTitle, Sheet, MenuItem, confirmDialog, inputCls, toast } from '../components/ui';
 
 export default function ProgramEditor() {
@@ -30,7 +31,7 @@ export default function ProgramEditor() {
             const w = d ? byId.get(d) : undefined;
             return (
               <Card key={i} className="flex items-center gap-3 px-3 py-2">
-                <span className="w-12 text-xs text-muted">Day {i + 1}</span>
+                <span className="w-12 text-xs text-muted">{p.days.length === 7 ? DAY_NAMES[i] : `Day ${i + 1}`}</span>
                 <button className="min-w-0 flex-1 text-left" onClick={() => (w ? nav(`/workout/${w.id}`) : setPickFor(i))}>
                   <span className={`block truncate ${w ? 'font-semibold' : 'text-muted'}`}>{w ? w.name : 'Rest day · tap to add a workout'}</span>
                 </button>

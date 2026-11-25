@@ -51,7 +51,7 @@ export default function Preview() {
           {items.map((it) => (
             <Card key={it.id} className="flex items-center gap-3 px-3 py-2">
               {it.supersetGroup ? <Link2 size={16} className="text-accent" /> : null}
-              <div className="min-w-0 flex-1"><p className="truncate font-semibold">{exs?.get(it.exerciseId)?.name}</p><p className="num text-xs text-muted">{it.targetSets} sets · {it.repMin === it.repMax ? it.repMin : `${it.repMin}–${it.repMax}`} reps{it.targetRir != null ? ` · ${it.targetRir} RIR` : ''}</p></div>
+              <div className="min-w-0 flex-1"><p className="truncate font-semibold">{exs?.get(it.exerciseId)?.name}</p><p className="num text-xs text-muted">{it.targetSets} sets · {it.repMin === it.repMax ? it.repMin : `${it.repMin}–${it.repMax}`} reps{it.targetRir != null ? ` · ${it.targetRir} RIR` : ''}{it.restSec ? ` · ${Math.floor(it.restSec / 60)}:${String(it.restSec % 60).padStart(2, '0')} rest` : ''}</p></div>
             </Card>
           ))}
         </div>
