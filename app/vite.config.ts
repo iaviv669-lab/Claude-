@@ -11,7 +11,7 @@ export default defineConfig(({ mode }) => ({
     mode === 'single'
       ? viteSingleFile()
       : VitePWA({
-          registerType: 'prompt',
+          registerType: 'autoUpdate',
           includeAssets: ['icon.svg', 'apple-touch-icon.png'],
           manifest: {
             name: 'Ironrow',
