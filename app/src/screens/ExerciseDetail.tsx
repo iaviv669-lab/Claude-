@@ -73,7 +73,8 @@ export default function ExerciseDetail() {
           {[...(pts ?? [])].reverse().slice(0, 30).map((p) => (
             <div key={p.startedAt} className="num flex justify-between rounded-md bg-surface px-3 py-2 text-sm">
               <span>{fmtDate(p.date)}</span>
-              <span className="text-muted">{p.sets} set{p.sets === 1 ? "" : "s"} · top {fmtWeight(p.heaviest, unit, true)}{p.e1rm ? ` · e1RM ${fmtWeight(p.e1rm, unit)}` : ''}</span>
+              <span className="min-w-0 truncate pl-3 text-right text-muted">{p.top.filter((t) => t.type !== 'warmup').map((t) => `${t.weightKg ? fmtWeight(t.weightKg, unit) : 'BW'}×${t.reps ?? 0}`).join(', ')}</span>
+              <span className="hidden">{p.sets} set{p.sets === 1 ? "" : "s"} · top {fmtWeight(p.heaviest, unit, true)}{p.e1rm ? ` · e1RM ${fmtWeight(p.e1rm, unit)}` : ''}</span>
             </div>
           ))}
           {pts && pts.length === 0 ? <p className="text-sm text-muted">You haven’t logged this exercise yet.</p> : null}

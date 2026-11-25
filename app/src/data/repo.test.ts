@@ -170,3 +170,28 @@ describe('progression + records widget', () => {
     expect(recs.some((x) => x.kind === 'weight' && x.value === 110)).toBe(true);
   });
 });
+
+describe('CSV import', () => {
+  it('round-trips our own export and is idempotent', async () => {
+    await logSession([100, 100], 5);
+    const csv = await r.exportCSV('kg');
+    await db.sessions.clear(); await db.sessionExercises.clear(); await db.setLogs.clear();
+    const a = await r.importSetsCSV(csv, 'kg');
+    expect(a).toMatchObject({ sessions: 1, sets: 2, skipped: 0, newExercises: [] });
+    const b = await r.importSetsCSV(csv, 'kg');
+    expect(b).toMatchObject({ sessions: 0, skipped: 1 });
+    expect((await r.exerciseHistory(SQUAT))[0].heaviest).toBe(100);
+  });
+  it('reads a Strong-style export in lb with an unknown exercise', async () => {
+    const csv = 'Date,Workout Name,Duration,Exercise Name,Set Order,Weight,Reps,RPE\n"2024-03-01 18:00:00",Legs,1h 5m,Squat,1,225,5,8\n"2024-03-01 18:00:00",Legs,1h 5m,Squat,2,225,5,9\n"2024-03-01 18:00:00",Legs,1h 5m,Belt Squat,1,180,10,\n';
+    const res = await r.importSetsCSV(csv, 'lb');
+    expect(res).toMatchObject({ sessions: 1, sets: 3, newExercises: ['Belt Squat'] });
+    const h = await r.exerciseHistory(SQUAT); // "squat" matches the alias on Back Squat
+    expect(Math.round(h[0].heaviest * 2.2046226218)).toBe(225);
+    const s = (await db.sessions.toArray())[0];
+    expect((s.endedAt! - s.startedAt) / 60000).toBe(65);
+  });
+  it('rejects a file without the needed columns', async () => {
+    await expect(r.importSetsCSV('foo,bar\n1,2', 'kg')).rejects.toThrow(/date, exercise and reps/);
+  });
+});

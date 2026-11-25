@@ -14,6 +14,7 @@ export default function Preview() {
   const exs = useLiveQuery(async () => new Map((await db.exercises.toArray()).map((e) => [e.id, e])), []);
   const active = useLiveQuery(repo.getActiveSession, []);
   const settings = useLiveQuery(() => db.settings.get('me'), []);
+  const typical = useLiveQuery(() => repo.typicalDurationMs(id), [id]);
   if (data === undefined) return <div className="p-8 text-center text-muted">Loading…</div>;
   if (data === null) return <><Header title="Workout" back="/" /><Page><p className="text-muted">This workout doesn’t exist any more.</p></Page></>;
   const { workout, items } = data;
@@ -40,7 +41,7 @@ export default function Preview() {
         <IconButton label="Edit" onClick={() => nav(`/workout/${id}/edit`)}><Pencil size={20} /></IconButton>
       </>} />
       <Page>
-        <div className="flex gap-2"><Stat label="Exercises" value={items.length} /><Stat label="Sets" value={sets} /><Stat label="About" value={`${estMin} min`} /></div>
+        <div className="flex gap-2"><Stat label="Exercises" value={items.length} /><Stat label="Sets" value={sets} /><Stat label={typical ? 'Usually' : 'About'} value={`${typical ? Math.round(typical / 60000) : estMin} min`} sub={typical ? 'from your past sessions' : 'estimate'} /></div>
         <SectionTitle>Targets</SectionTitle>
         <div className="flex flex-wrap gap-1.5">
           {[...muscles.entries()].sort((a, b) => b[1] - a[1]).map(([m, n]) => <span key={m} className="rounded-full bg-surface-2 px-3 py-1 text-xs">{MUSCLE_LABEL[m]} <span className="num text-muted">{n}</span></span>)}

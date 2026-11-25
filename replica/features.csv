@@ -51,3 +51,12 @@ Accounts and cloud sync,platform,skip,yes,skip,personal use: on-device only
 Sharing programs with other users,social,skip,yes,skip,not needed for one user
 Nutrition app integration / steps / Apple Health,integrations,skip,yes,skip,their ecosystem; web has no HealthKit
 Body measurements progress photos period tracking,body,skip,yes,skip,outside the workout logging slice
+Inline last-time sets + per-session sets in exercise history,history,should,no,yes,fix: too many taps to see last session
+Suggestions rounded to loadable weights,logging,should,no,yes,fix: suggests dumbbells you do not have
+Notes and cues carry forward into the logger,logging,should,no,yes,fix: notes do not follow workouts
+Duration estimate from your own past sessions,workouts,could,no,yes,fix: estimates far too low
+Loud rest alert option,logging,could,no,yes,fix: timer sound quiet/unreliable
+RIR explainer,logging,could,no,yes,fix: jargon
+"Import history from CSV (other apps, spreadsheets)",settings,should,no,yes,fix: cannot import years of data
+"Starter splits (PPL, Upper/Lower)",programs,could,no,no,request: PPL / bro split missing
+Cardio sessions,logging,could,no,no,request: cardio

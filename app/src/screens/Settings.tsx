@@ -23,6 +23,7 @@ export default function Settings() {
   const bw = useLiveQuery(() => db.bodyWeights.orderBy('localDate').last(), []);
   const counts = useLiveQuery(async () => ({ sessions: await db.sessions.where('status').equals('completed').count(), custom: await db.exercises.where('isCustom').equals(1).count() }), []);
   const file = useRef<HTMLInputElement>(null);
+  const csvFile = useRef<HTMLInputElement>(null);
   const [restEdit, setRestEdit] = useState(false);
   const [warmEdit, setWarmEdit] = useState(false);
   const [bwText, setBwText] = useState('');
@@ -47,6 +48,7 @@ export default function Settings() {
           <Toggle label="Add warm-ups automatically" hint="Compound lifts, from your last working weight" checked={s.warmupAutomation === 'smart'} onChange={(v) => repo.updateSettings({ warmupAutomation: v ? 'smart' : 'off' })} />
           <button className={row} onClick={() => setWarmEdit(true)}><span>Warm-up scheme</span><span className="num text-sm text-muted">{s.warmupScheme.map((w) => `${Math.round(w.pct * 100)}%×${w.reps}`).join(' · ')}</span></button>
           <Toggle label="Jump to the next exercise" checked={s.autoAdvance} onChange={(v) => repo.updateSettings({ autoAdvance: v })} />
+          <Toggle label="Loud rest alert" hint="Three beeps and a longer buzz when rest is over" checked={!!s.loudAlert} onChange={(v) => repo.updateSettings({ loudAlert: v })} />
           <Toggle label="Keep screen on during workouts" checked={s.keepAwake} onChange={(v) => repo.updateSettings({ keepAwake: v })} />
           <Toggle label="Count bodyweight in volume" hint="For pull-ups, dips etc. Uses your latest bodyweight." checked={s.bodyweightContribution} onChange={(v) => repo.updateSettings({ bodyweightContribution: v })} />
         </Card>
@@ -71,6 +73,16 @@ export default function Settings() {
           <Button block onClick={async () => { download(`${APP_NAME.toLowerCase()}-backup-${localDate()}.json`, await repo.exportJSON(), 'application/json'); toast('Backup downloaded'); }}><Download size={18} />Export backup (JSON)</Button>
           <Button block onClick={async () => download(`${APP_NAME.toLowerCase()}-sets-${localDate()}.csv`, await repo.exportCSV(s.unit), 'text/csv')}><Download size={18} />Export sets (CSV, for spreadsheets)</Button>
           <Button block onClick={() => file.current?.click()}><Upload size={18} />Restore from backup</Button>
+          <Button block onClick={() => csvFile.current?.click()}><Upload size={18} />Import history from CSV</Button>
+          <p className="text-xs text-muted">CSV with one row per set: date, exercise, weight, reps (workout name and set order optional). Exports from most lifting apps and simple spreadsheets work. Weight unit is read from the header, else your current unit.</p>
+          <input ref={csvFile} type="file" accept=".csv,text/csv" className="hidden" onChange={async (e) => {
+            const f = e.target.files?.[0]; e.target.value = '';
+            if (!f) return;
+            try {
+              const r = await repo.importSetsCSV(await f.text(), s.unit);
+              toast(`Imported ${r.sessions} workouts, ${r.sets} sets${r.skipped ? ` (${r.skipped} already there)` : ''}${r.newExercises.length ? `, ${r.newExercises.length} new exercises` : ''}`);
+            } catch (err) { toast(err instanceof Error ? err.message : 'Could not read that file'); }
+          }} />
           <input ref={file} type="file" accept="application/json,.json" className="hidden" onChange={async (e) => {
             const f = e.target.files?.[0]; e.target.value = '';
             if (!f) return;

@@ -144,3 +144,14 @@ test('a11y scans on main screens', async ({ page }) => {
   await page.evaluate(() => document.documentElement.classList.add('dark'));
   await axe(page, 'design (dark)');
 });
+
+test('import history from a CSV file', async ({ page }) => {
+  await onboard(page);
+  await page.getByRole('link', { name: 'Settings' }).click();
+  const chooser = page.waitForEvent('filechooser');
+  await page.getByRole('button', { name: 'Import history from CSV' }).click();
+  await (await chooser).setFiles({ name: 'log.csv', mimeType: 'text/csv', buffer: Buffer.from('date,workout,exercise,weight_kg,reps\n2026-11-20,Push,Barbell Bench Press,80,5\n2026-11-20,Push,Barbell Bench Press,80,5\n') });
+  await expect(page.getByText('Imported 1 workouts, 2 sets')).toBeVisible();
+  await page.getByRole('link', { name: 'History' }).click();
+  await expect(page.getByText('Push')).toBeVisible();
+});

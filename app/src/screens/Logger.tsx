@@ -20,11 +20,12 @@ const TYPE_NAME: Record<SetType, string> = { standard: 'Normal set', warmup: 'Wa
 // ---------- rest alert ----------
 
 let audioCtx: AudioContext | null = null;
-function beep() {
+function beep(times = 1) {
   try {
     audioCtx ??= new AudioContext();
     const t = audioCtx.currentTime;
-    for (const [i, f] of [880, 1175].entries()) {
+    const tones = Array.from({ length: times }, () => [880, 1175]).flat();
+    for (const [i, f] of tones.entries()) {
       const o = audioCtx.createOscillator(), g = audioCtx.createGain();
       o.frequency.value = f; o.connect(g); g.connect(audioCtx.destination);
       g.gain.setValueAtTime(0.0001, t + i * 0.18); g.gain.exponentialRampToValueAtTime(0.3, t + i * 0.18 + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t + i * 0.18 + 0.16);
@@ -32,9 +33,9 @@ function beep() {
     }
   } catch { /* no audio */ }
 }
-function restDone() {
-  navigator.vibrate?.([200, 100, 200]);
-  beep();
+function restDone(loud = false) {
+  navigator.vibrate?.(loud ? [300, 120, 300, 120, 300] : [200, 100, 200]);
+  beep(loud ? 3 : 1);
   if (document.hidden && 'Notification' in window && Notification.permission === 'granted') {
     try { new Notification('Rest is over', { body: 'Time for your next set.', tag: 'rest' }); } catch { /* ignore */ }
   }
@@ -89,7 +90,7 @@ export function Logger() {
   useEffect(() => {
     if (session?.restEndsAt && t >= session.restEndsAt && firedFor.current !== session.restEndsAt) {
       firedFor.current = session.restEndsAt;
-      restDone();
+      restDone(!!settings?.loudAlert);
       repo.setRest(session.id, null);
     }
   }, [t, session]);
@@ -257,6 +258,8 @@ function ExerciseBlock({ row, ex, unit, settings, gym, onTick, onMenu, onPlates 
 }) {
   const nav = useNavigate();
   const prev = useLiveQuery(() => repo.previousSets(row.se.exerciseId, row.se.sessionId), [row.se.exerciseId, row.se.sessionId]);
+  const lastNote = useLiveQuery(() => repo.lastNoteFor(row.se.exerciseId, row.se.sessionId), [row.se.exerciseId, row.se.sessionId]);
+  const [rirHelp, setRirHelp] = useState(false);
   const [typeFor, setTypeFor] = useState<SetLog | null>(null);
   const prevWorking = (prev ?? []).filter((s) => s.type !== 'warmup');
   const prevWarm = (prev ?? []).filter((s) => s.type === 'warmup');
@@ -264,7 +267,7 @@ function ExerciseBlock({ row, ex, unit, settings, gym, onTick, onMenu, onPlates 
   const barbell = !!ex?.equipment.includes('barbell') || !!ex?.equipment.includes('smith') || !!ex?.equipment.includes('trap_bar');
   let w = 0, wu = 0;
   const target = row.se.repMin && row.se.repMax ? `${row.se.repMin === row.se.repMax ? row.se.repMin : `${row.se.repMin}–${row.se.repMax}`} reps${row.se.targetRir != null ? ` · ${row.se.targetRir} RIR` : ''}` : null;
-  void settings; void gym;
+  void settings;
 
   return (
     <div className="px-3 pb-3 pt-2">
@@ -276,15 +279,17 @@ function ExerciseBlock({ row, ex, unit, settings, gym, onTick, onMenu, onPlates 
         <IconButton label={`Options for ${ex?.name ?? 'exercise'}`} onClick={onMenu}><MoreVertical size={20} /></IconButton>
       </div>
       {row.se.progressionNote ? <p className="mx-1 mb-1 flex items-center gap-1 text-xs font-semibold text-success"><TrendingUp size={14} />{row.se.progressionNote}</p> : null}
-      {row.se.notes ? <p className="mx-1 mb-1 rounded-sm bg-surface-2 px-2 py-1 text-xs text-muted">{row.se.notes}</p> : null}
+      {ex?.notes ? <p className="mx-1 mb-1 rounded-sm bg-surface-2 px-2 py-1 text-xs"><span className="font-semibold">Cue: </span>{ex.notes}</p> : null}
+      {lastNote && !row.se.notes ? <p className="mx-1 mb-1 rounded-sm bg-surface-2 px-2 py-1 text-xs"><span className="font-semibold">Last time: </span>{lastNote}</p> : null}
+      {row.se.notes ? <p className="mx-1 mb-1 rounded-sm bg-surface-2 px-2 py-1 text-xs"><span className="font-semibold">Note: </span>{row.se.notes}</p> : null}
       <div className="grid grid-cols-[2.25rem_minmax(0,1fr)_4.5rem_3.75rem_2.75rem_2.75rem] items-center gap-x-1.5 px-1 text-xs text-muted">
-        <span className="text-center">Set</span><span>Previous</span><span className="text-center">{isTime ? unit : unit}</span><span className="text-center">{isTime ? 'Sec' : 'Reps'}</span><span className="text-center">RIR</span><span />
+        <span className="text-center">Set</span><span>Previous</span><span className="text-center">{isTime ? unit : unit}</span><span className="text-center">{isTime ? 'Sec' : 'Reps'}</span><button className="text-center underline decoration-dotted underline-offset-2" onClick={() => setRirHelp(true)} aria-label="What is RIR?">RIR</button><span />
       </div>
       <div className="mt-1 space-y-1">
         {row.sets.map((s) => {
           const p = s.type === 'warmup' ? prevWarm[wu++] : prevWorking[w++];
           const label = s.type === 'warmup' ? 'W' : String(w);
-          return <SetRow key={s.id} set={s} label={label} prev={p} unit={unit} barbell={barbell} isTime={isTime}
+          return <SetRow key={s.id} set={s} label={label} prev={p} unit={unit} barbell={barbell} isTime={isTime} round={(kg) => (ex ? repo.roundLoadable(kg, ex, gym, unit) : kg)}
             onTick={(ph) => onTick(s, row, ph)} onType={() => setTypeFor(s)} onPlates={() => onPlates(s.id, s.entries[0]?.weightKg ?? p?.entries[0]?.weightKg ?? null)} />;
         })}
       </div>
@@ -293,6 +298,15 @@ function ExerciseBlock({ row, ex, unit, settings, gym, onTick, onMenu, onPlates 
         {!ex?.isBodyweight ? <Button size="sm" variant="ghost" className="text-muted" onClick={async () => { const n = await repo.addWarmups(row.se.id); toast(n ? `Added ${n} warm-up set${n > 1 ? 's' : ''}` : 'Enter a working weight first'); }}><Flame size={16} />Warm-ups</Button> : null}
       </div>
       <SetTypeSheet set={typeFor} onClose={() => setTypeFor(null)} />
+      <Sheet open={rirHelp} onClose={() => setRirHelp(false)} title="RIR: reps in reserve">
+        <p>How many more clean reps you could have done when you stopped the set.</p>
+        <ul className="mt-3 space-y-1 text-sm">
+          <li><b>0</b>: couldn’t do another rep with good form (failure)</li>
+          <li><b>1–2</b>: hard, one or two left. Where most muscle-building sets should end</li>
+          <li><b>3+</b>: comfortable; fine for warm-ups and heavy compound lifts early on</li>
+        </ul>
+        <p className="mt-3 text-sm text-muted">Optional. Logging it makes the weight suggestions smarter: a set that was too hard holds the weight next time instead of adding more.</p>
+      </Sheet>
     </div>
   );
 }
@@ -310,8 +324,8 @@ function NumInput({ value, onCommit, placeholder, decimal, label, disabled }: { 
   );
 }
 
-function SetRow({ set, label, prev, unit, barbell, isTime, onTick, onType, onPlates }: {
-  set: SetLog; label: string; prev?: SetLog; unit: 'kg' | 'lb'; barbell: boolean; isTime: boolean;
+function SetRow({ set, label, prev, unit, barbell, isTime, onTick, onType, onPlates, round }: {
+  set: SetLog; label: string; prev?: SetLog; unit: 'kg' | 'lb'; barbell: boolean; isTime: boolean; round: (kg: number) => number;
   onTick: (ph: { weightKg: number | null; reps: number | null }) => void; onType: () => void; onPlates: () => void;
 }) {
   const done = !!set.completed;
@@ -360,7 +374,7 @@ function SetRow({ set, label, prev, unit, barbell, isTime, onTick, onType, onPla
       {multi ? (
         <button className="ml-11 h-8 text-xs font-semibold text-accent" onClick={() => {
           const last = set.entries[set.entries.length - 1];
-          const nextW = set.type === 'drop' && last.weightKg ? Math.round(last.weightKg * 0.8 * 4) / 4 : last.weightKg;
+          const nextW = set.type === 'drop' && last.weightKg ? round(last.weightKg * 0.8) : last.weightKg;
           repo.updateSet(set.id, { entries: [...set.entries, { weightKg: nextW, reps: null, partialReps: 0 }] });
         }}>+ {set.type === 'drop' ? 'Drop' : 'Mini-set'}</button>
       ) : null}

@@ -302,6 +302,32 @@ function blankSet(se: SessionExercise, sessionId: Id, index: number, unit: Unit,
   return { id: newId(), createdAt: t, updatedAt: t, sessionExerciseId: se.id, sessionId, exerciseId: se.exerciseId, index, type, entries: [{ weightKg, reps, partialReps: 0 }], enteredUnit: unit, rir, completed: 0, completedAt: null };
 }
 
+/** Round a weight to something you can actually load with this exercise's equipment at this gym. */
+export function roundLoadable(kg: number, ex: Exercise, gym: GymProfile | undefined, unit: Unit): number {
+  const step = stepFor(ex, gym, unit);
+  const isBar = ex.equipment.some((q) => q === 'barbell' || q === 'smith' || q === 'ez_bar' || q === 'trap_bar');
+  const base = isBar ? (gym?.barWeightsKg[0] ?? (unit === 'kg' ? 20 : toKg(45, 'lb'))) : 0;
+  if (kg <= base) return base || kg;
+  return Math.round((base + Math.round((kg - base) / step) * step) * 1000) / 1000;
+}
+
+/** Most recent note you wrote on this exercise in a finished workout. */
+export async function lastNoteFor(exerciseId: Id, excludeSessionId?: Id): Promise<string | null> {
+  const rows = await db.sessionExercises.where('exerciseId').equals(exerciseId).filter((r) => !!r.notes && r.sessionId !== excludeSessionId).toArray();
+  let best: { note: string; at: number } | null = null;
+  for (const r of rows) {
+    const s = await db.sessions.get(r.sessionId);
+    if (s?.status === 'completed' && (!best || s.startedAt > best.at)) best = { note: r.notes, at: s.startedAt };
+  }
+  return best?.note ?? null;
+}
+
+/** Median real duration of past sessions of a workout, or null. */
+export async function typicalDurationMs(workoutId: Id): Promise<number | null> {
+  const d = (await db.sessions.where('workoutId').equals(workoutId).filter((s) => s.status === 'completed').toArray()).map((s) => elapsedMs(s)).filter((x) => x > 60000).sort((a, b) => a - b);
+  return d.length ? d[Math.floor(d.length / 2)] : null;
+}
+
 /** Smallest sensible weight jump for an exercise at a gym. */
 export function stepFor(ex: Exercise, gym: GymProfile | undefined, unit: Unit): number {
   const smallPlate = Math.min(...(gym?.platesKg ?? [unit === 'kg' ? 1.25 : toKg(2.5, 'lb')]));
@@ -327,6 +353,7 @@ async function buildSetsFor(se: SessionExercise, sessionId: Id, targetSets: numb
   const sug = settings.prefill === 'previous' && settings.suggestProgression !== false && se.repMin && se.repMax && ex && !ex.isBodyweight
     ? suggestProgression(prev.map((p) => ({ weightKg: p.entries[0]?.weightKg ?? null, reps: p.entries[0]?.reps ?? null, rir: p.rir })), se.repMin, se.repMax, se.targetRir, stepFor(ex, gym, settings.unit))
     : null;
+  if (sug && ex) sug.weightKg = roundLoadable(sug.weightKg, ex, gym, settings.unit);
   if (sug) { se.progressionNote = sug.note; await db.sessionExercises.update(se.id, { progressionNote: sug.note }); }
   for (let i = 0; i < n; i++) {
     const p = settings.prefill === 'previous' ? prev[i] ?? prev[prev.length - 1] : undefined;
@@ -686,7 +713,7 @@ export async function logBodyWeight(local: string, weightKg: number) {
   await db.bodyWeights.put(row);
 }
 
-export interface ExercisePoint { date: string; startedAt: number; e1rm: number | null; heaviest: number; volume: number; bestSetVolume: number; reps: number; bestSetReps: number; sets: number; }
+export interface ExercisePoint { top: { weightKg: number | null; reps: number | null; type: string }[]; date: string; startedAt: number; e1rm: number | null; heaviest: number; volume: number; bestSetVolume: number; reps: number; bestSetReps: number; sets: number; }
 
 export async function exerciseHistory(exerciseId: Id): Promise<ExercisePoint[]> {
   const sets = (await db.setLogs.where('[exerciseId+completedAt]').between([exerciseId, 1], [exerciseId, Infinity]).toArray()).filter(isWorking);
@@ -700,6 +727,7 @@ export async function exerciseHistory(exerciseId: Id): Promise<ExercisePoint[]> 
     const reps = ss.map((s) => s.entries.reduce((a, e) => a + (e.reps ?? 0), 0));
     const e1 = ss.map(bestE1rm).filter((v): v is number => v != null);
     pts.push({
+      top: ss.sort((a, b) => a.index - b.index).map((s) => ({ weightKg: s.entries[0]?.weightKg ?? null, reps: s.entries[0]?.reps ?? null, type: s.type })),
       date: sess.localDate, startedAt: sess.startedAt, e1rm: e1.length ? Math.max(...e1) : null,
       heaviest: Math.max(...ss.flatMap((s) => s.entries.map((e) => e.weightKg ?? 0))),
       volume: vols.reduce((a, b) => a + b, 0), bestSetVolume: Math.max(...vols),
@@ -775,6 +803,50 @@ export async function exportCSV(unit: Unit): Promise<string> {
     }
   }
   return rows.map((r) => r.map((c) => (/[",\n]/.test(c) ? `"${c.replace(/"/g, '""')}"` : c)).join(',')).join('\n');
+}
+
+/** Import set-per-row CSV history. Idempotent: a workout with the same start time and name is skipped. */
+export async function importSetsCSV(text: string, fallbackUnit: Unit) {
+  const { parseCSV, mapSets } = await import('../lib/csv');
+  const { sets, unit, error } = mapSets(parseCSV(text), fallbackUnit);
+  if (error) throw new Error(error);
+  const all = await db.exercises.toArray();
+  const byName = new Map<string, Id>();
+  for (const e of all) for (const n of [e.name, ...e.aliases]) byName.set(n.toLowerCase(), e.id);
+  const groups = new Map<string, typeof sets>();
+  for (const st of sets) { const k = `${st.when}|${st.workout}`; (groups.get(k) ?? groups.set(k, []).get(k)!).push(st); }
+  let sessions = 0, setCount = 0, skipped = 0;
+  const created: string[] = [];
+  await db.transaction('rw', [db.exercises, db.sessions, db.sessionExercises, db.setLogs], async () => {
+    for (const [, list] of groups) {
+      const when = list[0].when, name = list[0].workout;
+      if (await db.sessions.where('startedAt').equals(when).filter((s) => s.name === name).count()) { skipped++; continue; }
+      const t = now(), sessionId = newId();
+      const mins = list[0].durationMin ?? Math.max(20, list.length * 3);
+      await db.sessions.put({ id: sessionId, createdAt: t, updatedAt: t, workoutId: null, name, gymId: null, status: 'completed', startedAt: when, endedAt: when + mins * 60000, localDate: localDate(when), pausedMs: 0, pausedAt: null, restEndsAt: null, notes: '' });
+      sessions++;
+      const order: string[] = [];
+      const byEx = new Map<string, typeof list>();
+      for (const st of list) { if (!byEx.has(st.exercise)) { order.push(st.exercise); byEx.set(st.exercise, []); } byEx.get(st.exercise)!.push(st); }
+      for (const [k, exName] of order.entries()) {
+        let exId = byName.get(exName.toLowerCase());
+        if (!exId) {
+          const e = await saveExercise({ name: exName, notes: 'Added by import. Set its muscles so charts count it.' });
+          exId = e.id; byName.set(exName.toLowerCase(), exId); created.push(exName);
+        }
+        const se: SessionExercise = { id: newId(), createdAt: t, updatedAt: t, sessionId, exerciseId: exId, order: k, supersetGroup: null, swappedFromExerciseId: null, repMin: null, repMax: null, targetRir: null, notes: '' };
+        await db.sessionExercises.put(se);
+        const rows = byEx.get(exName)!.sort((a, b) => a.order - b.order);
+        await db.setLogs.bulkPut(rows.map((st, i) => ({
+          id: newId(), createdAt: t, updatedAt: t, sessionExerciseId: se.id, sessionId, exerciseId: exId!, index: i, type: st.type,
+          entries: [{ weightKg: st.weight == null ? null : toKg(st.weight, unit), reps: st.reps, partialReps: 0 }], enteredUnit: unit,
+          rir: st.rir, completed: 1 as const, completedAt: when + i * 1000,
+        })));
+        setCount += rows.length;
+      }
+    }
+  });
+  return { sessions, sets: setCount, skipped, newExercises: created, unit };
 }
 
 export async function deleteAllData() {
