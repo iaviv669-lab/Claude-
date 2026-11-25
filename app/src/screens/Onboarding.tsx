@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import { Dumbbell } from 'lucide-react';
 import { Button, Field, Segmented, inputCls } from '../components/ui';
 import { GYM_PRESETS, finishOnboarding } from '../data/repo';
 import type { Unit } from '../data/schema';
-import { APP_NAME, TAGLINE } from '../brand';
+import { TAGLINE } from '../brand';
+import { AppIcon, Wordmark } from '../components/Logo';
 
 export function Onboarding() {
   const [unit, setUnit] = useState<Unit>(navigator.language === 'en-US' ? 'lb' : 'kg');
@@ -11,12 +11,14 @@ export function Onboarding() {
   const [preset, setPreset] = useState<keyof typeof GYM_PRESETS>('Full gym');
   const [busy, setBusy] = useState(false);
   return (
-    <main className="mx-auto flex min-h-full max-w-app flex-col px-5 pb-10 pt-safe-10">
-      <div className="mb-8 flex items-center gap-3">
-        <span className="flex h-12 w-12 items-center justify-center rounded-lg bg-accent text-on-accent"><Dumbbell /></span>
-        <div><h1 className="text-xl">{APP_NAME}</h1><p className="text-sm text-muted">{TAGLINE}</p></div>
+    <main className="mx-auto flex min-h-full max-w-app flex-col pb-10">
+      <div className="brand-gradient pt-safe-10 -mb-2 rounded-b-lg px-5 pb-8 text-white">
+        <AppIcon size={64} className="drop-shadow-lg" />
+        <h1 className="mt-5"><Wordmark height={30} /></h1>
+        <p className="mt-2 text-base text-white/85">{TAGLINE}</p>
       </div>
-      <div className="space-y-6">
+      <div className="h-8" />
+      <div className="space-y-6 px-5">
         <div>
           <p className="mb-2 text-sm font-semibold">Weights in</p>
           <Segmented label="Weight unit" value={unit} onChange={setUnit} options={[{ value: 'kg', label: 'Kilograms' }, { value: 'lb', label: 'Pounds' }]} />
@@ -36,7 +38,7 @@ export function Onboarding() {
           </div>
         </div>
       </div>
-      <div className="mt-auto pt-10">
+      <div className="mt-auto px-5 pt-10">
         <Button variant="primary" size="lg" block loading={busy} onClick={async () => { setBusy(true); await finishOnboarding(unit, gym.trim() || 'My gym', preset); }}>Start training</Button>
         <p className="mt-3 text-center text-xs text-muted">No account. Everything is stored on this device; export a backup from Settings.</p>
       </div>

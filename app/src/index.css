@@ -49,6 +49,8 @@ body { @apply bg-bg text-text font-sans antialiased; -webkit-tap-highlight-color
 input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
 .safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
 .pt-safe { padding-top: env(safe-area-inset-top); }
+/* the brand's dark purple gradient (same stops as the app icon) */
+.brand-gradient { background: linear-gradient(135deg, #5a2fd6 0%, #2a1173 55%, #0e0826 100%); }
 .pt-safe-10 { padding-top: calc(env(safe-area-inset-top) + 2.5rem); }
 /* feel like an app, not a page: no double-tap zoom, no long-press callouts or text selection on controls */
 button, a, [role='switch'], label { touch-action: manipulation; -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }

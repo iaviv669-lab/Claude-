@@ -4,7 +4,7 @@ import { ChevronRight, ClipboardList, Play, Plus, Zap } from 'lucide-react';
 import { db } from '../data/schema';
 import { getActiveSession, nextProgramWorkout, startSession } from '../data/repo';
 import { Button, Card, Empty, Header, Page, SectionTitle } from '../components/ui';
-import { APP_NAME } from '../brand';
+import { Wordmark } from '../components/Logo';
 import { fmtDate } from '../lib/time';
 
 export function WorkoutTab() {
@@ -26,7 +26,7 @@ export function WorkoutTab() {
 
   return (
     <>
-      <Header title={APP_NAME} />
+      <Header title={<span className="block pl-2 text-accent"><Wordmark height={20} /></span>} />
       <Page>
         {active ? (
           <Card className="mb-4 border-accent bg-accent-soft">
