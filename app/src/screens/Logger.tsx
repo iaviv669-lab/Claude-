@@ -120,14 +120,9 @@ export function Logger() {
 
   const onTick = async (set: SetLog, row: { se: SessionExercise; sets: SetLog[] }, placeholders: { weightKg: number | null; reps: number | null }) => {
     const done = !set.completed;
-    if (done) {
-      const e = set.entries[0];
-      const fill = { weightKg: e.weightKg ?? placeholders.weightKg, reps: e.reps ?? placeholders.reps };
-      if (fill.reps == null) { toast('Enter reps first'); return; }
-      if (fill.weightKg !== e.weightKg || fill.reps !== e.reps) await repo.updateSet(set.id, { entries: [{ ...e, ...fill }, ...set.entries.slice(1)] });
-      navigator.vibrate?.(15);
-    }
-    const rest = await repo.completeSet(set.id, done);
+    const rest = await repo.tickSet(set.id, done, placeholders);
+    if (rest === 'need-reps') { toast('Enter reps first'); return; }
+    if (done) navigator.vibrate?.(15);
     if (done && rest) await startRest(rest);
     if (done && settings?.autoAdvance) {
       const left = row.sets.filter((s) => !s.completed && s.id !== set.id).length;
@@ -316,8 +311,7 @@ function SetRow({ set, label, prev, unit, barbell, isTime, onTick, onType, onPla
   const pe = prev?.entries[0];
   const prevText = pe ? `${pe.weightKg ? `${fmtWeight(pe.weightKg, unit)} × ` : ''}${pe.reps ?? ''}${isTime ? 's' : ''}${prev!.entries.length > 1 ? ` +${prev!.entries.length - 1}` : ''}` : '—';
   const multi = set.type === 'drop' || set.type === 'myo';
-  const setEntry = (i: number, patch: Partial<SetLog['entries'][0]>) =>
-    repo.updateSet(set.id, { entries: set.entries.map((e, k) => (k === i ? { ...e, ...patch } : e)) });
+  const setEntry = (i: number, patch: Partial<SetLog['entries'][0]>) => repo.patchEntry(set.id, i, patch);
   const weightOf = (e: SetLog['entries'][0]) => (e.weightKg == null ? null : Number(fmtWeight(e.weightKg, unit)));
   const ph = { weightKg: pe?.weightKg ?? null, reps: pe?.reps ?? null };
   return (
@@ -348,7 +342,7 @@ function SetRow({ set, label, prev, unit, barbell, isTime, onTick, onType, onPla
           ) : <span />}
           {i === 0 ? (
             <button onClick={() => onTick(ph)} aria-pressed={done} aria-label={done ? `Untick set ${label}` : `Complete set ${label}`}
-              className={`flex h-11 w-11 items-center justify-center rounded-md ${done ? 'bg-success text-white' : 'border border-border-input bg-bg text-muted'}`}>
+              className={`flex h-11 w-11 items-center justify-center rounded-md ${done ? 'bg-success text-on-success' : 'border border-border-input bg-bg text-muted'}`}>
               <Check size={20} strokeWidth={3} />
             </button>
           ) : (

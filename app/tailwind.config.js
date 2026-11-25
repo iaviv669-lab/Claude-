@@ -6,7 +6,7 @@ export default {
   theme: {
     extend: {
       colors: Object.fromEntries(
-        ['bg','surface','surface-2','border','border-input','text','muted','accent','on-accent','accent-soft','danger','success','success-soft','warning']
+        ['bg','surface','surface-2','border','border-input','text','muted','accent','on-accent','accent-soft','danger','success','success-soft','warning','on-danger','on-success']
           .map((n) => [n, c(n)])),
       fontFamily: { sans: ['Inter', 'system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'sans-serif'] },
       fontSize: { xs: ['12px', '16px'], sm: ['14px', '20px'], base: ['16px', '24px'], lg: ['20px', '28px'], xl: ['28px', '34px'], display: ['40px', '44px'] },

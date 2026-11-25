@@ -18,6 +18,8 @@
   --success: 29 117 71;
   --success-soft: 227 243 234;
   --warning: 138 90 0;
+  --on-danger: 255 255 255;
+  --on-success: 255 255 255;
   color-scheme: light;
 }
 :root.dark {
@@ -35,6 +37,8 @@
   --success: 76 201 138;
   --success-soft: 20 48 31;
   --warning: 240 180 76;
+  --on-danger: 26 5 5;
+  --on-success: 4 19 11;
   color-scheme: dark;
 }
 

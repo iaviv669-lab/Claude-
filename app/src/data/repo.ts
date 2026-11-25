@@ -1,7 +1,7 @@
 // The data layer. Screens call only these. Each write is one Dexie transaction.
 import { db, newId, now } from './schema';
 import type {
-  Exercise, GymProfile, Id, Program, Session, SessionExercise, SetLog, SetType, Settings, Unit, Workout, WorkoutItem,
+  Exercise, GymProfile, Id, Program, Session, SessionExercise, SetEntry, SetLog, SetType, Settings, Unit, Workout, WorkoutItem,
   Muscle, BodyWeight,
 } from './schema';
 import { seedExercises } from './seed';
@@ -503,12 +503,45 @@ export async function restFor(seId: Id): Promise<number> {
   return itemRest ?? ex?.restOverrideSec ?? (ex ? settings.restDefaults[ex.type] : 90);
 }
 
+/** Patch one entry of a set as an atomic read-modify-write, so quick edits to different fields never overwrite each other. */
+export async function patchEntry(setId: Id, index: number, patch: Partial<SetEntry>) {
+  await db.transaction('rw', db.setLogs, async () => {
+    const s = await db.setLogs.get(setId);
+    if (!s || !s.entries[index]) return;
+    const entries = s.entries.map((e, i) => (i === index ? { ...e, ...patch } : e));
+    await db.setLogs.update(setId, { entries, updatedAt: now() });
+  });
+}
+
+/** Tick/untick atomically. Blank weight/reps are filled from the placeholders (last time). Returns rest seconds, null, or 'need-reps'. */
+export async function tickSet(setId: Id, done: boolean, placeholders: { weightKg: number | null; reps: number | null }): Promise<number | null | 'need-reps'> {
+  const ok = await db.transaction('rw', db.setLogs, async () => {
+    const s = await db.setLogs.get(setId);
+    if (!s) return false;
+    if (!done) { await db.setLogs.update(setId, { completed: 0, completedAt: null, updatedAt: now() }); return false; }
+    const e = s.entries[0];
+    const filled = { ...e, weightKg: e.weightKg ?? placeholders.weightKg, reps: e.reps ?? placeholders.reps };
+    if (filled.reps == null) return 'need-reps' as const;
+    await db.setLogs.update(setId, { entries: [filled, ...s.entries.slice(1)], completed: 1, completedAt: now(), updatedAt: now() });
+    return true;
+  });
+  if (ok === 'need-reps') return 'need-reps';
+  if (!ok) return null;
+  return restAfter(setId);
+}
+
 /** Tick a set. Returns the rest to start (null = don't start rest, e.g. mid-superset or a warm-up chain). */
 export async function completeSet(setId: Id, done: boolean): Promise<number | null> {
   const s = await db.setLogs.get(setId);
   if (!s) return null;
   await db.setLogs.update(setId, { completed: done ? 1 : 0, completedAt: done ? now() : null, updatedAt: now() });
   if (!done) return null;
+  return restAfter(setId);
+}
+
+async function restAfter(setId: Id): Promise<number | null> {
+  const s = await db.setLogs.get(setId);
+  if (!s) return null;
   const se = await db.sessionExercises.get(s.sessionExerciseId);
   if (!se) return null;
   if (se.supersetGroup) {

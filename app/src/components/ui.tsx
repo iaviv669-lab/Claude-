@@ -11,7 +11,7 @@ const VARIANT: Record<Variant, string> = {
   primary: 'bg-accent text-on-accent active:brightness-95',
   secondary: 'bg-surface-2 text-text active:bg-border',
   ghost: 'bg-transparent text-text active:bg-surface-2',
-  danger: 'bg-danger text-white active:brightness-95',
+  danger: 'bg-danger text-on-danger active:brightness-95',
 };
 const SIZE: Record<Size, string> = { sm: 'h-8 px-3 text-sm', md: 'h-11 px-4 text-sm', lg: 'h-12 px-5 text-base' };
 

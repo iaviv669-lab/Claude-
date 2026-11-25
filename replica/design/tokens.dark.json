@@ -14,7 +14,9 @@
     "danger": "#ff6b6b",
     "success": "#4cc98a",
     "success-soft": "#14301f",
-    "warning": "#f0b44c"
+    "warning": "#f0b44c",
+    "on-danger": "#1a0505",
+    "on-success": "#04130b"
   },
   "pairs": [
     [
@@ -83,6 +85,14 @@
       "border-input",
       "surface",
       "ui"
+    ],
+    [
+      "on-danger",
+      "danger"
+    ],
+    [
+      "on-success",
+      "success"
     ]
   ],
   "font": {

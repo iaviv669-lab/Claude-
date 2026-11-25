@@ -1,4 +1,5 @@
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test } from './fixtures';
+import type { Page } from '@playwright/test';
 
 const SHOTS = process.env.SHOTS;
 const shot = async (page: Page, name: string) => { if (SHOTS) await page.screenshot({ path: `${SHOTS}/${name}.png` }); };
@@ -33,6 +34,7 @@ test('F02 quick workout: log, rest, finish, summary, history', async ({ page }) 
   await page.getByLabel('Set 2 weight', { exact: true }).fill('100');
   await page.getByLabel('Set 2 reps', { exact: true }).fill('5');
   await page.getByRole('button', { name: 'Complete set 2' }).click();
+  await expect(page.getByRole('button', { name: 'Untick set 2' })).toBeVisible();
   await shot(page, '03-logger');
 
   // survives reload mid-workout

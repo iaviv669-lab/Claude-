@@ -130,3 +130,23 @@ describe('core loop', () => {
     expect(await r.deleteExercise(ex2.id)).toBe('deleted');
   });
 });
+
+describe('B01 concurrent field edits', () => {
+  it('weight and reps written back-to-back both survive', async () => {
+    const id = await r.startSession(null);
+    await r.addExercisesToSession(id, [SQUAT]);
+    const s = (await r.getSessionTree(id))!.exercises[0].sets[0];
+    await Promise.all([r.patchEntry(s.id, 0, { weightKg: 100 }), r.patchEntry(s.id, 0, { reps: 5 })]);
+    expect((await db.setLogs.get(s.id))!.entries[0]).toMatchObject({ weightKg: 100, reps: 5 });
+  });
+  it('tick fills blanks from placeholders atomically and refuses without reps', async () => {
+    const id = await r.startSession(null);
+    await r.addExercisesToSession(id, [SQUAT]);
+    const s = (await r.getSessionTree(id))!.exercises[0].sets[0];
+    expect(await r.tickSet(s.id, true, { weightKg: null, reps: null })).toBe('need-reps');
+    await Promise.all([r.patchEntry(s.id, 0, { weightKg: 100 }), r.tickSet(s.id, true, { weightKg: 90, reps: 5 })]);
+    const row = (await db.setLogs.get(s.id))!;
+    expect(row.completed).toBe(1);
+    expect(row.entries[0]).toMatchObject({ weightKg: 100, reps: 5 });
+  });
+});
