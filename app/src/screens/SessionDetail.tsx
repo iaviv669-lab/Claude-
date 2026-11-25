@@ -89,6 +89,7 @@ export default function SessionDetail() {
           </div>
         ) : null}
         <Button size="sm" variant="ghost" className="mt-2 text-accent" onClick={() => { setDate(toLocalInput(s.startedAt)); setMins(String(Math.round(repo.elapsedMs(s) / 60000))); setEditTime(true); }}><Pencil size={14} />Edit date & duration</Button>
+        {s.notes ? <p className="mt-2 rounded-md bg-surface-2 px-3 py-2 text-sm">{s.notes}</p> : null}
         <div className="mt-4"><SetList tree={tree} unit={unit} names={names} editable /></div>
       </Page>
       <Sheet open={editTime} onClose={() => setEditTime(false)} title="Date & duration" footer={

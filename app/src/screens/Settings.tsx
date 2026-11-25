@@ -42,6 +42,7 @@ export default function Settings() {
         <SectionTitle>Workouts</SectionTitle>
         <Card className="divide-y divide-border py-1">
           <Segmented label="Prefill sets with" value={s.prefill} onChange={(prefill) => repo.updateSettings({ prefill })} options={[{ value: 'previous', label: 'Last time' }, { value: 'targets', label: 'Targets only' }]} />
+          <Toggle label="Suggest weight increases" hint="When you hit the top of an exercise’s rep range on every set, prefill the next step up" checked={s.suggestProgression !== false} onChange={(v) => repo.updateSettings({ suggestProgression: v })} />
           <button className={row} onClick={() => setRestEdit(true)}><span>Default rest times</span><ChevronRight size={18} className="text-muted" /></button>
           <Toggle label="Add warm-ups automatically" hint="Compound lifts, from your last working weight" checked={s.warmupAutomation === 'smart'} onChange={(v) => repo.updateSettings({ warmupAutomation: v ? 'smart' : 'off' })} />
           <button className={row} onClick={() => setWarmEdit(true)}><span>Warm-up scheme</span><span className="num text-sm text-muted">{s.warmupScheme.map((w) => `${Math.round(w.pct * 100)}%×${w.reps}`).join(' · ')}</span></button>

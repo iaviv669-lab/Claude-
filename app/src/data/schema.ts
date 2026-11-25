@@ -37,6 +37,7 @@ export interface Settings extends Row {
   keepAwake: boolean;
   bodyweightContribution: boolean;
   prefill: 'previous' | 'targets';
+  suggestProgression?: boolean;   // default on
   restDefaults: Record<ExerciseType, number>; // seconds, e.g. compound_lower 180, isolation_upper 90
   warmupAutomation: 'off' | 'smart';
   warmupScheme: WarmupStep[]; // e.g. [{pct:.4,reps:8},{pct:.6,reps:5},{pct:.8,reps:3}]
@@ -123,6 +124,7 @@ export interface SessionExercise extends Row {
   order: number;
   supersetGroup: Id | null;
   swappedFromExerciseId: Id | null;
+  progressionNote?: string | null; // why the prefilled numbers changed (double progression)
   repMin: number | null;
   repMax: number | null;
   targetRir: number | null;

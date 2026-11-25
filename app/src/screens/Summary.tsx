@@ -32,6 +32,7 @@ export default function Summary() {
           <Stat label="Sets" value={summary.sets} />
           <Stat label="Volume" value={fmtVolume(summary.volumeKg, unit)} />
         </div>
+        {tree.session.notes ? <p className="mt-3 rounded-md bg-surface-2 px-3 py-2 text-sm">{tree.session.notes}</p> : null}
         <p className="mt-2 text-center text-xs text-muted">Started {start.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })}</p>
         {prs.length ? (
           <>

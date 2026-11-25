@@ -1,48 +1,48 @@
 feature,area,priority,original,clone,notes
-First-run setup: units and default gym equipment,onboarding,must,yes,no,S01; no account for personal use
-Seeded exercise library with search,exercises,must,yes,no,our own list of common lifts; their content/videos are skip
-Filter exercises by muscle / type / equipment,exercises,must,yes,no,S06
-Create / edit / delete custom exercise,exercises,must,yes,no,S19 fields from help article 328
-Build and save a workout (template),workouts,must,yes,no,S05 F03
-Reorder and remove exercises in a workout,workouts,must,yes,no,
-Per-exercise targets: sets and rep range and RIR,workouts,must,yes,no,
-Empty (ad-hoc) workout,workouts,must,yes,no,F02
-Workout preview before start,logging,must,yes,no,S07
-Active logger: weight x reps per set with tick,logging,must,yes,no,S08 core loop
-Previous performance column per set,logging,must,yes,no,"No previous" on first time
-Prefill sets from last session,logging,must,yes,no,their "previous values" fill mode
-Add / remove sets and exercises mid-workout,logging,must,yes,no,
-Workout duration timer,logging,must,yes,no,
-Rest timer auto-starts on tick with +/-10s and presets,logging,must,yes,no,S09
-Rest alert when finished (vibrate/sound/notification),logging,must,yes,no,web: Notification API + vibration where supported
-Session survives reload / app close,logging,must,yes,no,persist after every change
-Complete / discard workout,logging,must,yes,no,S13
-Workout summary: volume duration PRs per-exercise breakdown,history,must,yes,no,S14
-Workout history list and detail,history,must,yes,no,S15 S16
-Exercise detail chart: e1RM heaviest volume reps over time,progress,must,yes,no,S17
-kg / lb units,settings,must,yes,no,
-Edit past workout (sets date duration) and delete,history,should,yes,no,S16
-Set types: warm-up drop myo failure,logging,should,yes,no,S11; drop/myo = multi-entry sets
-RIR per set,logging,should,yes,no,
-Supersets (group adjacent exercises; rest after round),logging,should,yes,no,F06
-Swap exercise with suggested substitutes,logging,should,yes,no,S12; suggest by shared primary muscles + pattern
-Plate calculator per side,logging,should,yes,no,S10 F07
-Gym profiles: equipment bar weights plate increments,settings,should,yes,no,S21
-Default rest timers by movement type + per-exercise override,settings,should,yes,no,
-Smart warm-ups from % scheme,logging,should,yes,no,F08
-Auto-advance to next exercise when all sets done,logging,should,yes,no,toggle
-Pause / minimise workout (mini bar),logging,should,yes,no,
-Dashboard: weekly sets per muscle and recent records,progress,should,yes,no,S02
-Muscle group sets / volume over time,progress,should,yes,no,S18
-Export / import data (JSON + CSV),settings,should,yes,no,also your backup since data is on-device
-Programs with days A/B/C and active program,programs,could,yes,no,S20 F04
-Partial reps logging,logging,could,yes,no,
-Workout notes,logging,could,yes,no,
-Bodyweight contribution in volume,progress,could,yes,no,needs bodyweight log
-Simple double-progression suggestion,programs,could,yes,no,public rule; not their algorithm
-Body map on summary,history,could,yes,no,draw our own SVG
-Dark / light theme,settings,could,yes,no,
-Installable offline PWA,platform,could,yes,no,
+First-run setup: units and default gym equipment,onboarding,must,yes,yes,S01; no account for personal use
+Seeded exercise library with search,exercises,must,yes,yes,98 of our own exercises vs their hundreds with videos
+Filter exercises by muscle / type / equipment,exercises,must,yes,yes,S06
+Create / edit / delete custom exercise,exercises,must,yes,yes,S19 fields from help article 328
+Build and save a workout (template),workouts,must,yes,yes,S05 F03
+Reorder and remove exercises in a workout,workouts,must,yes,yes,
+Per-exercise targets: sets and rep range and RIR,workouts,must,yes,yes,
+Empty (ad-hoc) workout,workouts,must,yes,yes,F02
+Workout preview before start,logging,must,yes,yes,S07
+Active logger: weight x reps per set with tick,logging,must,yes,yes,S08 core loop
+Previous performance column per set,logging,must,yes,yes,No previous on first time
+Prefill sets from last session,logging,must,yes,yes,"their ""previous values"" fill mode"
+Add / remove sets and exercises mid-workout,logging,must,yes,yes,
+Workout duration timer,logging,must,yes,yes,
+Rest timer auto-starts on tick with +/-10s and presets,logging,must,yes,yes,S09
+Rest alert when finished (vibrate/sound/notification),logging,must,yes,yes,vibrate + beep; system notification only when installed (iOS 16.4+)
+Session survives reload / app close,logging,must,yes,yes,persist after every change
+Complete / discard workout,logging,must,yes,yes,S13
+Workout summary: volume duration PRs per-exercise breakdown,history,must,yes,yes,S14
+Workout history list and detail,history,must,yes,yes,S15 S16
+Exercise detail chart: e1RM heaviest volume reps over time,progress,must,yes,yes,S17
+kg / lb units,settings,must,yes,yes,
+Edit past workout (sets date duration) and delete,history,should,yes,yes,S16
+Set types: warm-up drop myo failure,logging,should,yes,yes,S11; drop/myo = multi-entry sets
+RIR per set,logging,should,yes,yes,
+Supersets (group adjacent exercises; rest after round),logging,should,yes,yes,F06
+Swap exercise with suggested substitutes,logging,should,yes,yes,S12; suggest by shared primary muscles + pattern
+Plate calculator per side,logging,should,yes,yes,S10 F07
+Gym profiles: equipment bar weights plate increments,settings,should,yes,yes,S21
+Default rest timers by movement type + per-exercise override,settings,should,yes,yes,
+Smart warm-ups from % scheme,logging,should,yes,yes,F08
+Auto-advance to next exercise when all sets done,logging,should,yes,yes,toggle
+Pause / minimise workout (mini bar),logging,should,yes,yes,
+Dashboard: weekly sets per muscle and recent records,progress,should,yes,yes,recent records widget + weekly sets per muscle
+Muscle group sets / volume over time,progress,should,yes,yes,S18
+Export / import data (JSON + CSV),settings,should,yes,yes,also your backup since data is on-device
+Programs with days A/B/C and active program,programs,could,yes,yes,S20 F04
+Partial reps logging,logging,could,yes,yes,
+Workout notes,logging,could,yes,yes,per-exercise and whole-workout notes
+Bodyweight contribution in volume,progress,could,yes,yes,needs bodyweight log
+Simple double-progression suggestion,programs,could,yes,yes,prefills next step; toggle in Settings
+Body map on summary,history,could,yes,yes,draw our own SVG
+Dark / light theme,settings,could,yes,yes,
+Installable offline PWA,platform,could,yes,yes,
 Smart program generation,programs,skip,yes,skip,their core algorithm; out of chosen slice
 Smart Progression algorithm,programs,skip,yes,skip,their algorithm; use public double progression instead
 Technique videos and written cues,exercises,skip,yes,skip,owned content (Jeff Nippard videos)

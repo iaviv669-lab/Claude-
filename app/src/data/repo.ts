@@ -9,6 +9,7 @@ import { localDate } from '../lib/time';
 import { warmupSets } from '../lib/warmup';
 import { bestE1rm, isWorking, setVolume } from '../lib/e1rm';
 import { toKg } from '../lib/units';
+import { suggestProgression } from '../lib/progression';
 
 // ---------- settings & first run ----------
 
@@ -301,6 +302,14 @@ function blankSet(se: SessionExercise, sessionId: Id, index: number, unit: Unit,
   return { id: newId(), createdAt: t, updatedAt: t, sessionExerciseId: se.id, sessionId, exerciseId: se.exerciseId, index, type, entries: [{ weightKg, reps, partialReps: 0 }], enteredUnit: unit, rir, completed: 0, completedAt: null };
 }
 
+/** Smallest sensible weight jump for an exercise at a gym. */
+export function stepFor(ex: Exercise, gym: GymProfile | undefined, unit: Unit): number {
+  const smallPlate = Math.min(...(gym?.platesKg ?? [unit === 'kg' ? 1.25 : toKg(2.5, 'lb')]));
+  if (ex.equipment.some((q) => q === 'barbell' || q === 'smith' || q === 'ez_bar' || q === 'trap_bar')) return smallPlate * 2;
+  if (ex.equipment.includes('dumbbell') || ex.equipment.includes('kettlebell')) return gym?.dumbbellIncrementKg ?? (unit === 'kg' ? 2 : toKg(5, 'lb'));
+  return unit === 'kg' ? 2.5 : toKg(5, 'lb');
+}
+
 async function buildSetsFor(se: SessionExercise, sessionId: Id, targetSets: number, settings: Settings, gym: GymProfile | undefined): Promise<SetLog[]> {
   const prev = (await previousSets(se.exerciseId, sessionId)).filter((s) => s.type !== 'warmup');
   const out: SetLog[] = [];
@@ -315,9 +324,15 @@ async function buildSetsFor(se: SessionExercise, sessionId: Id, targetSets: numb
     }
   }
   const n = Math.max(1, targetSets);
+  const sug = settings.prefill === 'previous' && settings.suggestProgression !== false && se.repMin && se.repMax && ex && !ex.isBodyweight
+    ? suggestProgression(prev.map((p) => ({ weightKg: p.entries[0]?.weightKg ?? null, reps: p.entries[0]?.reps ?? null, rir: p.rir })), se.repMin, se.repMax, se.targetRir, stepFor(ex, gym, settings.unit))
+    : null;
+  if (sug) { se.progressionNote = sug.note; await db.sessionExercises.update(se.id, { progressionNote: sug.note }); }
   for (let i = 0; i < n; i++) {
     const p = settings.prefill === 'previous' ? prev[i] ?? prev[prev.length - 1] : undefined;
-    out.push(blankSet(se, sessionId, index++, settings.unit, p?.type === 'failure' ? 'failure' : 'standard', p?.entries[0]?.weightKg ?? null, p?.entries[0]?.reps ?? (settings.prefill === 'targets' ? se.repMax : null), se.targetRir));
+    const w = sug ? sug.weightKg : p?.entries[0]?.weightKg ?? null;
+    const r = sug ? sug.reps : p?.entries[0]?.reps ?? (settings.prefill === 'targets' ? se.repMax : null);
+    out.push(blankSet(se, sessionId, index++, settings.unit, p?.type === 'failure' ? 'failure' : 'standard', w, r, se.targetRir));
   }
   return out;
 }
@@ -628,6 +643,14 @@ export async function computeRecords(sessionId: Id): Promise<Record_[]> {
 }
 
 // ---------- stats ----------
+
+/** Records set in the most recent completed sessions, newest first. */
+export async function recentRecords(sessionsBack = 12): Promise<(Record_ & { date: string })[]> {
+  const sessions = (await db.sessions.where('status').equals('completed').reverse().sortBy('startedAt')).slice(0, sessionsBack);
+  const out: (Record_ & { date: string })[] = [];
+  for (const s of sessions) for (const r of await computeRecords(s.id)) out.push({ ...r, date: s.localDate });
+  return out;
+}
 
 export interface SessionSummary { volumeKg: number; sets: number; durationMs: number; muscles: Map<Muscle, number>; }
 

@@ -46,3 +46,12 @@ describe('time', () => {
   it('sunday week start', () => expect(weekStart('2026-11-25', 0)).toBe('2026-11-22'));
   it('clock', () => { expect(fmtClock(90)).toBe('1:30'); expect(fmtClock(3725)).toBe('1:02:05'); });
 });
+
+import { suggestProgression } from './progression';
+describe('double progression', () => {
+  const S = (w: number, r: number, rir: number | null = null) => ({ weightKg: w, reps: r, rir });
+  it('weight up when all sets hit the top', () => expect(suggestProgression([S(100, 12), S(100, 12)], 8, 12, 2, 2.5)).toMatchObject({ weightKg: 102.5, reps: 8, up: true }));
+  it('one more rep otherwise', () => expect(suggestProgression([S(100, 12), S(100, 10)], 8, 12, 2, 2.5)).toMatchObject({ weightKg: 100, reps: 11, up: false }));
+  it('too hard (RIR below target) holds the weight', () => expect(suggestProgression([S(100, 12, 0)], 8, 12, 2, 2.5)?.up).toBe(false));
+  it('nothing to go on', () => expect(suggestProgression([], 8, 12, 2, 2.5)).toBeNull());
+});

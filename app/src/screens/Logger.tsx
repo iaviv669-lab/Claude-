@@ -3,7 +3,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { useNavigate } from 'react-router-dom';
 import {
-  ArrowDown, ArrowUp, Check, Disc3, Flame, Info, Link2, Link2Off, Menu, MoreVertical, Pause, Play, Plus, Replace, Shrink, StickyNote, Timer, Trash2, X, Flag,
+  ArrowDown, ArrowUp, Check, Disc3, Flame, Info, Link2, Link2Off, Menu, MoreVertical, TrendingUp, Pause, Play, Plus, Replace, Shrink, StickyNote, Timer, Trash2, X, Flag,
 } from 'lucide-react';
 import { db, type Exercise, type GymProfile, type Id, type SessionExercise, type SetLog, type SetType, type Settings } from '../data/schema';
 import * as repo from '../data/repo';
@@ -71,6 +71,7 @@ export function Logger() {
   const [plates, setPlates] = useState<{ setId: Id; kg: number | null; exercise: Exercise } | null>(null);
   const [exMenu, setExMenu] = useState<SessionExercise | null>(null);
   const [settingsSheet, setSettingsSheet] = useState(false);
+  const [workoutNote, setWorkoutNote] = useState<string | null>(null);
   const firedFor = useRef<number | null>(null);
   const cardRefs = useRef(new Map<Id, HTMLElement>());
 
@@ -215,12 +216,17 @@ export function Logger() {
           ? <MenuItem icon={<Play size={20} />} onClick={() => { repo.pauseSession(session.id, false); setMenu(false); }}>Resume workout</MenuItem>
           : <MenuItem icon={<Pause size={20} />} hint="Stops the clock" onClick={() => { repo.pauseSession(session.id, true); setMenu(false); }}>Pause workout</MenuItem>}
         <MenuItem icon={<Shrink size={20} />} hint="Keep it running and use the rest of the app" onClick={() => { setMenu(false); nav('/'); }}>Minimise</MenuItem>
+        <MenuItem icon={<StickyNote size={20} />} hint={session.notes || 'How it went, sleep, energy…'} onClick={() => { setMenu(false); setWorkoutNote(session.notes); }}>{session.notes ? 'Edit workout note' : 'Add workout note'}</MenuItem>
         <MenuItem icon={<Flag size={20} />} onClick={() => { setMenu(false); finish(); }}>Finish workout</MenuItem>
         <MenuItem icon={<Disc3 size={20} />} hint="Warm-ups, auto-advance, keep screen on" onClick={() => { setMenu(false); setSettingsSheet(true); }}>Workout settings</MenuItem>
         <MenuItem icon={<Trash2 size={20} />} danger onClick={async () => {
           setMenu(false);
           if (await confirmDialog({ title: 'Discard workout?', body: 'Everything logged in this session will be deleted.', ok: 'Discard', danger: true })) { await repo.discardSession(session.id); nav('/'); }
         }}>Discard workout</MenuItem>
+      </Sheet>
+
+      <Sheet open={workoutNote != null} onClose={() => setWorkoutNote(null)} title="Workout note" footer={<Button variant="primary" block onClick={async () => { await db.sessions.update(session.id, { notes: workoutNote ?? '' }); setWorkoutNote(null); }}>Save note</Button>}>
+        <textarea autoFocus aria-label="Workout note" className={`${inputCls} h-32 py-2`} value={workoutNote ?? ''} onChange={(e) => setWorkoutNote(e.target.value)} placeholder="How it went, sleep, energy…" />
       </Sheet>
 
       {settings ? <QuickSettings open={settingsSheet} onClose={() => setSettingsSheet(false)} settings={settings} /> : null}
@@ -269,6 +275,7 @@ function ExerciseBlock({ row, ex, unit, settings, gym, onTick, onMenu, onPlates 
         </button>
         <IconButton label={`Options for ${ex?.name ?? 'exercise'}`} onClick={onMenu}><MoreVertical size={20} /></IconButton>
       </div>
+      {row.se.progressionNote ? <p className="mx-1 mb-1 flex items-center gap-1 text-xs font-semibold text-success"><TrendingUp size={14} />{row.se.progressionNote}</p> : null}
       {row.se.notes ? <p className="mx-1 mb-1 rounded-sm bg-surface-2 px-2 py-1 text-xs text-muted">{row.se.notes}</p> : null}
       <div className="grid grid-cols-[2.25rem_minmax(0,1fr)_4.5rem_3.75rem_2.75rem_2.75rem] items-center gap-x-1.5 px-1 text-xs text-muted">
         <span className="text-center">Set</span><span>Previous</span><span className="text-center">{isTime ? unit : unit}</span><span className="text-center">{isTime ? 'Sec' : 'Reps'}</span><span className="text-center">RIR</span><span />

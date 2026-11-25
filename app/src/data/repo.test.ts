@@ -150,3 +150,23 @@ describe('B01 concurrent field edits', () => {
     expect(row.entries[0]).toMatchObject({ weightKg: 100, reps: 5 });
   });
 });
+
+describe('progression + records widget', () => {
+  it('prefills weight up after hitting the top of the range', async () => {
+    const wid = await r.saveWorkout({ name: 'L', gymId: null }, [{ ...r.defaultItem(SQUAT), targetSets: 2, repMin: 5, repMax: 8, targetRir: null }]);
+    let id = await r.startSession(wid);
+    let sets = (await r.getSessionTree(id))!.exercises[0].sets;
+    for (const s of sets) { await r.updateSet(s.id, { entries: [{ weightKg: 100, reps: 8, partialReps: 0 }] }); await r.completeSet(s.id, true); }
+    await r.completeSession(id);
+    id = await r.startSession(wid);
+    const t = (await r.getSessionTree(id))!;
+    expect(t.exercises[0].sets[0].entries[0]).toMatchObject({ weightKg: 102.5, reps: 5 });
+    expect(t.exercises[0].se.progressionNote).toMatch(/weight up/);
+  });
+  it('lists recent records', async () => {
+    await logSession([100], 5);
+    await logSession([110], 5);
+    const recs = await r.recentRecords();
+    expect(recs.some((x) => x.kind === 'weight' && x.value === 110)).toBe(true);
+  });
+});

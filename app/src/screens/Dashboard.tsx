@@ -2,13 +2,13 @@
 import { useMemo, useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { useNavigate } from 'react-router-dom';
-import { BarChart3, ChevronRight } from 'lucide-react';
+import { BarChart3, ChevronRight, Trophy } from 'lucide-react';
 import { db, type Muscle } from '../data/schema';
 import * as repo from '../data/repo';
 import { Chart, Sparkline } from '../components/Chart';
 import { Card, Empty, Header, Page, SectionTitle, Segmented, Stat } from '../components/ui';
 import { MUSCLE_LABEL } from '../data/seed';
-import { localDate, weekStart } from '../lib/time';
+import { fmtDate, localDate, weekStart } from '../lib/time';
 import { fmtVolume, fmtWeight, fromKg } from '../lib/units';
 import { bestE1rm, isWorking } from '../lib/e1rm';
 
@@ -38,6 +38,8 @@ export default function Dashboard() {
     const exs = await db.exercises.bulkGet([...by.keys()]);
     return [...by.values()].map((v, i) => ({ ex: exs[i]!, ...v })).filter((x) => x.ex).sort((a, b) => a.last - b.last).slice(0, 8);
   }, []);
+  const records = useLiveQuery(() => repo.recentRecords(12), []);
+  const names = useLiveQuery(async () => new Map((await db.exercises.toArray()).map((e) => [e.id, e.name])), []);
   const muscleTop = useMemo(() => Object.entries(cur?.muscles ?? {}).sort((a, b) => b[1] - a[1]) as [Muscle, number][], [cur]);
   const series = useMemo(() => {
     const w = (weeks ?? []).slice(-16);
@@ -57,6 +59,21 @@ export default function Dashboard() {
           <Stat label="Sets" value={cur?.sets ?? 0} sub={last ? `last week ${last.sets}` : undefined} />
           <Stat label="Volume" value={fmtVolume(cur?.volumeKg ?? 0, unit)} />
         </div>
+
+        <SectionTitle>Recent records</SectionTitle>
+        <Card className="p-3">
+          {records && records.length === 0 ? <p className="text-sm text-muted">Beat a previous best and it shows up here.</p> : (
+            <ul className="divide-y divide-border">
+              {records?.filter((r) => r.kind !== 'volume').slice(0, 5).map((r, i) => (
+                <li key={i} className="flex items-center gap-3 py-2">
+                  <Trophy size={18} className="text-warning" />
+                  <span className="min-w-0 flex-1"><span className="block truncate text-sm font-semibold">{names?.get(r.exerciseId)}</span><span className="text-xs text-muted">{{ e1rm: 'Est. 1RM', weight: 'Heaviest', reps: 'Most reps', volume: 'Set volume' }[r.kind]} · {fmtDate(r.date)}</span></span>
+                  <span className="num text-sm font-semibold">{r.kind === 'reps' ? `${r.value} reps` : fmtWeight(Math.round(r.value * 10) / 10, unit, true)}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </Card>
 
         <SectionTitle right={<button className="flex items-center text-sm text-accent" onClick={() => nav('/muscles')}>All<ChevronRight size={16} /></button>}>Sets per muscle this week</SectionTitle>
         <Card className="p-3">
