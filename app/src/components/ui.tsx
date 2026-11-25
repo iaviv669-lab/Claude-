@@ -43,7 +43,7 @@ export function IconButton({ label, children, className = '', ...rest }: ButtonH
 export function Header({ title, back, right, sub }: { title: ReactNode; back?: boolean | string; right?: ReactNode; sub?: ReactNode }) {
   const nav = useNavigate();
   return (
-    <header className="sticky top-0 z-20 border-b border-border bg-bg/95 backdrop-blur">
+    <header className="sticky top-0 z-20 border-b border-border bg-bg/95 pt-safe backdrop-blur">
       <div className="mx-auto flex h-14 max-w-app items-center gap-1 px-2">
         {back ? (
           <IconButton label="Back" onClick={() => (typeof back === 'string' ? nav(back) : nav(-1))}><ChevronLeft size={22} /></IconButton>

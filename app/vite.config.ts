@@ -14,8 +14,8 @@ export default defineConfig(({ mode }) => ({
           registerType: 'prompt',
           includeAssets: ['icon.svg', 'apple-touch-icon.png'],
           manifest: {
-            name: 'Setkeeper',
-            short_name: 'Setkeeper',
+            name: 'Ironrow',
+            short_name: 'Ironrow',
             description: 'Your own workout logger. Works offline, keeps data on your device.',
             theme_color: '#0e1013',
             background_color: '#0e1013',

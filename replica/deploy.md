@@ -1,7 +1,7 @@
 # Deploy
 
 Live (private to you): **https://claude.ai/artifact/XLvqUQQooN2rgdqYSEne2E**. Version 1, 2026-11-25.
-Built from `app/` with `npx vite build --mode single`, wrapped into `deploy/setkeeper.html`.
+Built from `app/` with `npx vite build --mode single`, wrapped into `deploy/ironrow.html`.
 Declared capability: `downloads` (so backups/CSV exports can be saved from inside claude.ai).
 
 ## Preflight (2026-11-25)
@@ -38,8 +38,17 @@ Any static host works; you sign in and click, nothing to configure:
 - **Cloudflare Pages / Vercel**: connect this repo, root `app`, build `npm run build`, output `dist`.
 - **GitHub Pages**: needs the repo public (or a paid plan); deploy `app/dist`.
 
-Then open it on your phone and use "Add to Home Screen". That gives offline use, the full-screen app, and
-rest notifications (iOS 16.4+ when installed). A custom domain is only needed if you want one:
+Then open it on your phone and use "Add to Home Screen". That gives offline use and the full-screen app.
+Rest alerts are a beep and a buzz while the app is open; iPhones pause home-screen web apps when locked, so
+background notifications would need a push server. Use "Keep screen on" during workouts.
+
+**Hosted now:** GitHub Pages from the `gh-pages` branch, https://iaviv669-lab.github.io/Claude-/ (Pages must be
+switched on in the repo's Settings → Pages → Deploy from a branch → gh-pages / root).
+Update it: `cd app && npm run build`, then replace the contents of the `gh-pages` branch with `app/dist`.
+
+**App Store:** not pursued (owner's choice: personal use, no Apple Developer account or Mac). It would need the
+$99/yr account, a native wrapper (e.g. Capacitor) with real native features to pass guideline 4.2, and a macOS
+build (a Mac or a GitHub Actions macOS runner). A custom domain is only needed if you want one:
 point a CNAME at the host's target and it handles HTTPS.
 
 ## First week, watch for
@@ -50,4 +59,4 @@ point a CNAME at the host's target and it handles HTTPS.
 
 ## Redeploy
 
-`cd app && npm run build:artifact`, then publish `deploy/setkeeper.html` to the same artifact URL.
+`cd app && npm run build:artifact`, then publish `deploy/ironrow.html` to the same artifact URL.

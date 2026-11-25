@@ -49,7 +49,7 @@ export default function Settings() {
           <button className={row} onClick={() => setWarmEdit(true)}><span>Warm-up scheme</span><span className="num text-sm text-muted">{s.warmupScheme.map((w) => `${Math.round(w.pct * 100)}%×${w.reps}`).join(' · ')}</span></button>
           <Toggle label="Jump to the next exercise" checked={s.autoAdvance} onChange={(v) => repo.updateSettings({ autoAdvance: v })} />
           <Toggle label="Loud rest alert" hint="Three beeps and a longer buzz when rest is over" checked={!!s.loudAlert} onChange={(v) => repo.updateSettings({ loudAlert: v })} />
-          <Toggle label="Keep screen on during workouts" checked={s.keepAwake} onChange={(v) => repo.updateSettings({ keepAwake: v })} />
+          <Toggle label="Keep screen on during workouts" hint="Recommended on iPhone: a locked phone pauses the rest timer alert until you come back" checked={s.keepAwake} onChange={(v) => repo.updateSettings({ keepAwake: v })} />
           <Toggle label="Count bodyweight in volume" hint="For pull-ups, dips etc. Uses your latest bodyweight." checked={s.bodyweightContribution} onChange={(v) => repo.updateSettings({ bodyweightContribution: v })} />
         </Card>
 

@@ -151,7 +151,7 @@ export function Logger() {
   return (
     <div className="min-h-full pb-28">
       {/* top bar: menu, duration, rest */}
-      <header className="sticky top-0 z-20 border-b border-border bg-bg/95 backdrop-blur">
+      <header className="sticky top-0 z-20 border-b border-border bg-bg/95 pt-safe backdrop-blur">
         <div className="mx-auto flex h-14 max-w-app items-center gap-2 px-2">
           <IconButton label="Workout options" onClick={() => setMenu(true)}><Menu size={22} /></IconButton>
           <div className="min-w-0 flex-1">
@@ -483,7 +483,7 @@ function RestSheet({ open, onClose, left, onSet, onAdjust, onSkip }: { open: boo
       <div className="grid grid-cols-4 gap-2">
         {presets.map((s) => <Button key={s} size="sm" onClick={() => onSet(s)} className="num">{fmtClock(s)}</Button>)}
       </div>
-      <p className="mt-4 text-xs text-muted">You’ll get a buzz and a beep when rest is over{'Notification' in window ? ', and a notification if the app is in the background' : ''}.</p>
+      <p className="mt-4 text-xs text-muted">You’ll get a beep and a buzz when rest is over, while the app is open. Phones pause apps like this one when locked, so keep “Keep screen on” switched on in Settings.</p>
     </Sheet>
   );
 }

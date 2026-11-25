@@ -1,4 +1,4 @@
-# Brand: Setkeeper
+# Brand: Ironrow
 
 Angle (from `fixes.md`): for lifters who already have a plan, the fastest, most reliable
 logger. Every set saved on your phone the moment you tap it, no account.
@@ -19,7 +19,7 @@ puns are out); short; spellable; fits the angle. The App Store search (run 2026-
 | Repwise | 8, mostly workout trackers | **out** (was the placeholder) |
 | Liftledger | 5 workout logs | out |
 | Ironquill, Ironnote, Barline, Steadyset, Liftmark, Plateline, Setwell, Ironleaf | 1–3 each, mostly workout apps | out |
-| **Setkeeper** | 0 | **chosen** |
+| Setkeeper | 0 | used until 2026-11-25, then replaced by Ironrow at the owner's choice |
 | Repkeep | 0 | backup |
 | Tallyset | 0 | backup |
 | Gripwell | 0 exact, but crowded fitness results | backup |
@@ -38,6 +38,21 @@ Remaining checks for the shortlist, **to run** (this environment can't reach the
 
 For a personal app none of this blocks you. If you ever publish it, run these and ask a trademark
 lawyer before spending money on the name.
+
+### Rename to Ironrow (2026-11-25)
+
+The owner asked for "MacroTrack". The App Store search that day found it taken: at least 3 Health &
+Fitness apps use the exact name (plus "MacroTrack AI"), "macro" reads as nutrition tracking, and
+"Macro…" sits next to the original's name. Second round of candidates, App Store search 2026-11-25:
+
+| name | apps using it | |
+| --- | --- | --- |
+| **Ironrow** | 0 | **chosen by the owner** |
+| Repkeep, Tallyset, Repyard, Setpost | 0 | unused alternatives |
+| Setline, GymTally, LiftLoop, RepNote, BarBook, SetSmith, LiftJot, RepStack, GymLedger, IronLog, Liftlore, Benchbook, Plateday, Liftkin, IronPace, BarWise | 1–21 | taken |
+
+Trademark, domain, Play and handle checks for Ironrow: **to run** (not reachable from here).
+Not needed for personal use; run them before ever publishing.
 
 ## Palette
 
@@ -91,4 +106,4 @@ Most-seen strings (all written fresh for this app, none from the original):
 ## Sweep
 
 `python3 sweep.py . --config replica/brand.json` → **Clean** (2026-11-25), on `app/` and the whole repo.
-By eye: page title, PWA manifest name, favicon and backup file names all say Setkeeper.
+By eye: page title, PWA manifest name, home-screen name, favicon and backup file names all say Ironrow.

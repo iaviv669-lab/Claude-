@@ -11,7 +11,7 @@ export function Onboarding() {
   const [preset, setPreset] = useState<keyof typeof GYM_PRESETS>('Full gym');
   const [busy, setBusy] = useState(false);
   return (
-    <main className="mx-auto flex min-h-full max-w-app flex-col px-5 py-10">
+    <main className="mx-auto flex min-h-full max-w-app flex-col px-5 pb-10 pt-safe-10">
       <div className="mb-8 flex items-center gap-3">
         <span className="flex h-12 w-12 items-center justify-center rounded-lg bg-accent text-on-accent"><Dumbbell /></span>
         <div><h1 className="text-xl">{APP_NAME}</h1><p className="text-sm text-muted">{TAGLINE}</p></div>

@@ -3,7 +3,7 @@
 Scope chosen at recon: **personal use**, no billing, no store listing. So this step produced no
 landing page, pricing or store listing. Building them would be work with no user.
 
-If you decide to publish Setkeeper later, run `/replica-launch` again and do these first:
+If you decide to publish Ironrow later, run `/replica-launch` again and do these first:
 
 1. Finish the name checks marked "to run" in `../brand.md` (trademark, domain, Play, handles), and
    get a trademark lawyer's search before spending money on the name.
