@@ -55,3 +55,30 @@ describe('double progression', () => {
   it('too hard (RIR below target) holds the weight', () => expect(suggestProgression([S(100, 12, 0)], 8, 12, 2, 2.5)?.up).toBe(false));
   it('nothing to go on', () => expect(suggestProgression([], 8, 12, 2, 2.5)).toBeNull());
 });
+
+import { buildIcs, nextOccurrence, fold, escapeText } from './ics';
+describe('calendar reminders', () => {
+  const now = new Date(2026, 10, 25, 9, 0); // Wed 25 Nov 2026
+  it('next occurrence by weekday (Mon = 0)', () => {
+    expect(nextOccurrence(3, 17, 30, now).toDateString()).toBe(new Date(2026, 10, 26).toDateString()); // Thu
+    expect(nextOccurrence(0, 17, 30, now).toDateString()).toBe(new Date(2026, 10, 30).toDateString()); // next Mon
+    expect(nextOccurrence(2, 17, 30, now).toDateString()).toBe(new Date(2026, 10, 25).toDateString()); // today
+  });
+  it('weekly events with an alert, valid line endings and folding', () => {
+    const ics = buildIcs([{ weekday: 0, title: 'Ironrow: Upper 1', details: 'Incline Dumbbell Press, Pec Deck; and more' }, { weekday: 5, title: 'Ironrow: Legs', details: 'x'.repeat(200) }],
+      { time: '17:30', minutesBefore: 15, durationMin: 60, uidPrefix: 'p1', now });
+    expect(ics.startsWith('BEGIN:VCALENDAR\r\n')).toBe(true);
+    expect(ics.endsWith('END:VCALENDAR\r\n')).toBe(true);
+    expect(ics.match(/BEGIN:VEVENT/g)).toHaveLength(2);
+    expect(ics).toContain('RRULE:FREQ=WEEKLY;BYDAY=MO');
+    expect(ics).toContain('RRULE:FREQ=WEEKLY;BYDAY=SA');
+    expect(ics).toContain('DTSTART:20261130T173000');
+    expect(ics).toContain('TRIGGER:-PT15M');
+    expect(ics).toContain('DESCRIPTION:Incline Dumbbell Press\\, Pec Deck\; and more');
+    for (const l of ics.split('\r\n')) expect(new TextEncoder().encode(l).length).toBeLessThanOrEqual(75);
+  });
+  it('helpers', () => {
+    expect(escapeText('a,b;c\nd')).toBe('a\\,b\;c\\nd');
+    expect(fold('a'.repeat(80)).split('\r\n ').join('')).toBe('a'.repeat(80));
+  });
+});

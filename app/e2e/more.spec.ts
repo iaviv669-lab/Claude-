@@ -221,3 +221,31 @@ test('library exercise shows how-to steps', async ({ page }) => {
   await expect(page.getByText('How to do it')).toBeVisible();
 });
 
+
+test('workout reminders produce a calendar file for the weekly plan', async ({ page }) => {
+  await onboard(page);
+  // build a 7-day program with Upper 1 on Monday
+  await page.getByRole('button', { name: 'Create' }).click();
+  await page.getByText('New program').click();
+  for (let k = 0; k < 4; k++) await page.getByRole('button', { name: 'Add day' }).click(); // 3 + 4 = 7 days
+  await page.getByText('Rest day · tap to add a workout').first().click();
+  await page.getByText('Build a new workout').click();
+  await page.getByLabel('Name', { exact: true }).fill('Upper 1');
+  await page.getByRole('button', { name: 'Add exercises' }).click();
+  await page.getByRole('textbox', { name: 'Search exercises' }).fill('Pec Deck');
+  await page.getByRole('button', { name: /^Pec Deck/ }).first().click();
+  await page.getByRole('button', { name: 'Add 1 exercise' }).click();
+  await page.getByRole('button', { name: 'Save' }).click();
+  await page.getByRole('button', { name: 'Make active' }).click();
+  await page.getByRole('link', { name: 'Settings' }).click();
+  await expect(page.getByText('Mon Upper 1')).toBeVisible();
+  await page.getByLabel('Workout time').fill('18:30');
+  const dl = page.waitForEvent('download');
+  await page.getByRole('button', { name: 'Add reminders to Calendar' }).click();
+  const file = await (await dl).path();
+  const ics = (await import('node:fs')).readFileSync(file!, 'utf8');
+  expect(ics).toContain('RRULE:FREQ=WEEKLY;BYDAY=MO');
+  expect(ics).toContain('T183000');
+  expect(ics).toContain('SUMMARY:Ironrow: Upper 1');
+  expect(ics).toContain('TRIGGER:-PT15M');
+});

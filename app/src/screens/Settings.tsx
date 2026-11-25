@@ -11,6 +11,7 @@ import { fmtClock, localDate } from '../lib/time';
 import { fmtWeight, parseNum, toKg } from '../lib/units';
 import { APP_NAME } from '../brand';
 import { saveFile } from '../lib/saveFile';
+import { Reminders } from '../components/Reminders';
 
 async function download(name: string, text: string, type: string) {
   const r = await saveFile(name, text, type);
@@ -52,6 +53,9 @@ export default function Settings() {
           <Toggle label="Keep screen on during workouts" hint="Recommended on iPhone: a locked phone pauses the rest timer alert until you come back" checked={s.keepAwake} onChange={(v) => repo.updateSettings({ keepAwake: v })} />
           <Toggle label="Count bodyweight in volume" hint="For pull-ups, dips etc. Uses your latest bodyweight." checked={s.bodyweightContribution} onChange={(v) => repo.updateSettings({ bodyweightContribution: v })} />
         </Card>
+
+        <SectionTitle>Workout reminders</SectionTitle>
+        <Reminders settings={s} />
 
         <SectionTitle>Bodyweight</SectionTitle>
         <Card className="flex items-end gap-2">
