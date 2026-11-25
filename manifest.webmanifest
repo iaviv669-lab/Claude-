@@ -1,0 +1,1 @@
+{"name":"Setkeeper","short_name":"Setkeeper","start_url":"./","display":"standalone","background_color":"#0e1013","lang":"en","scope":"./","description":"Your own workout logger. Works offline, keeps data on your device.","theme_color":"#0e1013","icons":[{"src":"icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]}
