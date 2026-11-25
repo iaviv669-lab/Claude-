@@ -30,10 +30,17 @@ function useTheme() {
   const theme = useLiveQuery(() => db.settings.get('me').then((s) => s?.theme ?? 'system'), [], 'system');
   useEffect(() => {
     const mq = window.matchMedia('(prefers-color-scheme: dark)');
-    const apply = () => document.documentElement.classList.toggle('dark', theme === 'dark' || (theme === 'system' && mq.matches));
+    const root = document.documentElement;
+    // "system" follows a host-set data-theme (e.g. inside claude.ai) first, then the OS setting.
+    const apply = () => {
+      const host = root.getAttribute('data-theme');
+      root.classList.toggle('dark', theme === 'dark' || (theme === 'system' && (host === 'dark' || (host !== 'light' && mq.matches))));
+    };
     apply();
     mq.addEventListener('change', apply);
-    return () => mq.removeEventListener('change', apply);
+    const mo = new MutationObserver(apply);
+    mo.observe(root, { attributes: true, attributeFilter: ['data-theme'] });
+    return () => { mq.removeEventListener('change', apply); mo.disconnect(); };
   }, [theme]);
 }
 

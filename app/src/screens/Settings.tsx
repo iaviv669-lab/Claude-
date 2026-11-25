@@ -10,11 +10,11 @@ import { TYPE_LABEL } from '../data/seed';
 import { fmtClock, localDate } from '../lib/time';
 import { fmtWeight, parseNum, toKg } from '../lib/units';
 import { APP_NAME } from '../brand';
+import { saveFile } from '../lib/saveFile';
 
-function download(name: string, text: string, type: string) {
-  const url = URL.createObjectURL(new Blob([text], { type }));
-  const a = document.createElement('a'); a.href = url; a.download = name; a.click();
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
+async function download(name: string, text: string, type: string) {
+  const r = await saveFile(name, text, type);
+  toast(r === 'saved' ? 'File ready' : r === 'declined' ? 'Not saved' : 'Saving files isn’t available here. Open the app in a browser to export.');
 }
 
 export default function Settings() {
@@ -70,7 +70,7 @@ export default function Settings() {
         <SectionTitle>Your data</SectionTitle>
         <Card className="space-y-2">
           <p className="text-sm text-muted">Everything is stored only on this device ({counts?.sessions ?? 0} workouts). Export a backup now and then, and before switching phones or clearing browser data.</p>
-          <Button block onClick={async () => { download(`${APP_NAME.toLowerCase()}-backup-${localDate()}.json`, await repo.exportJSON(), 'application/json'); toast('Backup downloaded'); }}><Download size={18} />Export backup (JSON)</Button>
+          <Button block onClick={async () => download(`${APP_NAME.toLowerCase()}-backup-${localDate()}.json`, await repo.exportJSON(), 'application/json')}><Download size={18} />Export backup (JSON)</Button>
           <Button block onClick={async () => download(`${APP_NAME.toLowerCase()}-sets-${localDate()}.csv`, await repo.exportCSV(s.unit), 'text/csv')}><Download size={18} />Export sets (CSV, for spreadsheets)</Button>
           <Button block onClick={() => file.current?.click()}><Upload size={18} />Restore from backup</Button>
           <Button block onClick={() => csvFile.current?.click()}><Upload size={18} />Import history from CSV</Button>
