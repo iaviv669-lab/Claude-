@@ -221,15 +221,3 @@ test('library exercise shows how-to steps', async ({ page }) => {
   await expect(page.getByText('How to do it')).toBeVisible();
 });
 
-test('one tap adds my Upper/Upper/Legs plan', async ({ page }) => {
-  await onboard(page);
-  await page.getByRole('button', { name: 'Create' }).click();
-  await page.getByText('Add my Upper / Upper / Legs plan').click();
-  await expect(page.getByText('Your plan is added and active')).toBeVisible();
-  for (const d of ['Mon', 'Thu', 'Sat']) await expect(page.getByText(d, { exact: true })).toBeVisible();
-  await page.getByRole('button', { name: /Upper 1/ }).click();
-  await expect(page.getByText('Incline Dumbbell Press')).toBeVisible();
-  await expect(page.getByText('3 sets · 4–10 reps · 2:30 rest').first()).toBeVisible();
-  await expect(page.getByText('2 sets · 4–10 reps · 2:00 rest').first()).toBeVisible();
-  await expect(page.getByText(/RIR/)).toHaveCount(0);
-});

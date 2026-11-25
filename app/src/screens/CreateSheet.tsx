@@ -1,9 +1,7 @@
 import { useNavigate } from 'react-router-dom';
-import { CalendarCheck, CalendarRange, Dumbbell, ListPlus, Zap } from 'lucide-react';
-import { MenuItem, Sheet, confirmDialog, toast } from '../components/ui';
-import { db } from '../data/schema';
-import { MY_PLAN } from '../data/templates';
-import { addProgramFromTemplate, saveProgram, startSession } from '../data/repo';
+import { CalendarRange, Dumbbell, ListPlus, Zap } from 'lucide-react';
+import { MenuItem, Sheet, toast } from '../components/ui';
+import { saveProgram, startSession } from '../data/repo';
 
 export function CreateSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
   const nav = useNavigate();
@@ -13,15 +11,6 @@ export function CreateSheet({ open, onClose }: { open: boolean; onClose: () => v
       <MenuItem icon={<Zap size={20} />} hint="Start logging now, add exercises as you go" onClick={async () => { onClose(); await startSession(null, 'Quick workout'); nav('/session'); }}>Quick workout</MenuItem>
       <MenuItem icon={<ListPlus size={20} />} hint="A workout you can repeat" onClick={() => go('/workout/new')}>New workout</MenuItem>
       <MenuItem icon={<CalendarRange size={20} />} hint="A rotation of workouts, e.g. Push / Pull / Legs" onClick={async () => { const id = await saveProgram({ name: 'New program' }); go(`/program/${id}`); toast('Program created'); }}>New program</MenuItem>
-      <MenuItem icon={<CalendarCheck size={20} />} hint={MY_PLAN.description} onClick={async () => {
-        onClose();
-        if (await db.programs.where('archived').equals(0).filter((p) => p.name === MY_PLAN.name).count()) {
-          if (!(await confirmDialog({ title: 'You already have this plan', body: 'Add another copy? Your existing one stays as it is.', ok: 'Add copy' }))) return;
-        }
-        const { missing } = await addProgramFromTemplate(MY_PLAN);
-        toast(missing.length ? `Plan added (${missing.length} exercise${missing.length > 1 ? 's' : ''} not found)` : 'Your plan is added and active');
-        nav('/');
-      }}>Add my Upper / Upper / Legs plan</MenuItem>
       <MenuItem icon={<Dumbbell size={20} />} hint="Add a movement that isn’t in the list" onClick={() => go('/exercise/new')}>New exercise</MenuItem>
     </Sheet>
   );
