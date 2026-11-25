@@ -7,6 +7,7 @@
 | B03 | S3 | Dark mode: white text on danger button and on the ticked ✓ fails contrast (2.4:1) | fixed |
 | B04 | S4 | Estimated 1RM on the summary shows two decimals ("79.17 kg") | fixed |
 | B05 | S4 | "1 sets" / "1 exercises" plurals | fixed |
+| B06 | S2 | Typing in any pop-up panel closes the keyboard after one letter | fixed |
 
 ## B01 Typing weight then reps quickly can lose the weight (S1, data loss)
 Steps: start a workout, add Back Squat, type 100 in weight, immediately type 5 in reps, tick, reload.
@@ -21,6 +22,11 @@ Fix: replaced the chart library with a small SVG chart (`components/Chart.tsx`) 
 
 ## B03 Dark mode contrast (S3)
 Found by axe on the design page in dark mode. Added `on-danger` and `on-success` tokens; contrast.py 0 failures in both themes.
+
+## B06 Keyboard closes after every letter in pop-up panels (S2, reported by the owner on iPhone)
+Steps: Quick start → Add exercises → type "bench" in the search. Expected: "bench". Actual: "b", then focus jumps to the panel and the iPhone keyboard closes; same for the workout note, plate calculator, gym and settings panels.
+Cause: the bottom sheet re-ran its "focus the panel" effect whenever its `onClose` prop changed, and callers pass a new function on every render, so every keystroke moved focus off the input.
+Fix: `Sheet` keeps `onClose` in a ref and runs the focus effect only when it opens, and never steals focus from an input already inside it. Test: e2e "B06 typing in a panel keeps focus" types letter by letter (failed first, passes now).
 
 ## To check (not reproduced)
 - iOS Safari: background rest notification requires the app installed to the home screen; without it only the in-app beep/vibrate on return.

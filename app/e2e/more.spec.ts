@@ -155,3 +155,30 @@ test('import history from a CSV file', async ({ page }) => {
   await page.getByRole('link', { name: 'History' }).click();
   await expect(page.getByText('Push')).toBeVisible();
 });
+
+test('B06 typing in a panel keeps focus (keyboard stays up)', async ({ page }) => {
+  await onboard(page);
+  await page.getByRole('button', { name: 'Quick start' }).click();
+  await page.getByRole('button', { name: 'Add exercises' }).click();
+  const search = page.getByRole('textbox', { name: 'Search exercises' });
+  await search.click();
+  await page.keyboard.type('bench', { delay: 30 });
+  await expect(search).toHaveValue('bench');
+  await expect(search).toBeFocused();
+  // and in the logger itself
+  await page.getByRole('button', { name: /^Barbell Bench Press/ }).click();
+  await page.getByRole('button', { name: 'Add 1 exercise' }).click();
+  const w = page.getByLabel('Set 1 weight', { exact: true });
+  await w.click();
+  await page.keyboard.type('102.5', { delay: 30 });
+  await expect(w).toHaveValue('102.5');
+  await expect(w).toBeFocused();
+  // workout note sheet
+  await page.getByRole('button', { name: 'Workout options' }).click();
+  await page.getByText('Add workout note').click();
+  const note = page.getByRole('textbox', { name: 'Workout note' });
+  await note.click();
+  await page.keyboard.type('felt strong', { delay: 20 });
+  await expect(note).toHaveValue('felt strong');
+  await expect(note).toBeFocused();
+});
