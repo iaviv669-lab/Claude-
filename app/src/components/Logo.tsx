@@ -18,7 +18,7 @@ export function AppIcon({ size = 48, className = '' }: { size?: number; classNam
     <svg width={size} height={size} viewBox="0 0 512 512" className={className} aria-hidden>
       <defs><linearGradient id="ir-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#b9a4ff" /><stop offset=".55" stopColor="#7a4cf5" /><stop offset="1" stopColor="#5a2fd6" /></linearGradient></defs>
       <rect width="512" height="512" rx="112" fill="#0a0a0c" />
-      <path d={MARK_PATH} fill="url(#ir-g)" />
+      <path d={MARK_PATH} fill="url(#ir-g)" transform="translate(25.6 25.6) scale(0.9)" />
     </svg>
   );
 }
