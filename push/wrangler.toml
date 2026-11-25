@@ -13,3 +13,7 @@ VAPID_SUBJECT = "https://iaviv669-lab.github.io/Claude-/"
 ALLOWED_ORIGINS = "https://iaviv669-lab.github.io,http://localhost:4173,http://localhost:5173"
 # VAPID_PRIVATE_KEY is a secret (wrangler secret put); never committed
 # KV namespace binding SUBS is added by the deploy step
+
+[[kv_namespaces]]
+binding = "SUBS"
+id = "374d143d3781488db621a1701a24d8dd"
