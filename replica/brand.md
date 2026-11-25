@@ -60,14 +60,18 @@ Primary hue moved from the build-time placeholder blue to **violet**, its own fa
 
 | role | light | dark |
 | --- | --- | --- |
-| accent | #5b3fd9 | #a594ff |
+| accent | #4a24c4 | #9478ff |
 | on-accent | #ffffff | #120a33 |
-| accent-soft | #ece8fd | #251c4d |
+| accent-soft | #ebe5fc | #231848 |
 | neutrals, danger, success, warning | unchanged from `tokens*.json` | |
 
 `contrast.py`: 0 AA failures in light (17 pairs) and dark (18 pairs).
 The original's brand colours were never measured (no screenshots), so `brand.json` lists none.
 The name and domain sweep is what guards against leftovers.
+
+## Logo directions (2026-11-25)
+
+Six drafts in `design/logo-directions.png`: A Ascent, B IR monogram, C The plate, D Logbook rows, E Loaded bar, F wordmark with plate O's (icon = C). Owner to choose; then final art per the brief below.
 
 ## Logo brief
 
