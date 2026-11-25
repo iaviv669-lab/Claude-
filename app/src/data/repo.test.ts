@@ -183,9 +183,9 @@ describe('CSV import', () => {
     expect((await r.exerciseHistory(SQUAT))[0].heaviest).toBe(100);
   });
   it('reads a Strong-style export in lb with an unknown exercise', async () => {
-    const csv = 'Date,Workout Name,Duration,Exercise Name,Set Order,Weight,Reps,RPE\n"2024-03-01 18:00:00",Legs,1h 5m,Squat,1,225,5,8\n"2024-03-01 18:00:00",Legs,1h 5m,Squat,2,225,5,9\n"2024-03-01 18:00:00",Legs,1h 5m,Belt Squat,1,180,10,\n';
+    const csv = 'Date,Workout Name,Duration,Exercise Name,Set Order,Weight,Reps,RPE\n"2024-03-01 18:00:00",Legs,1h 5m,Squat,1,225,5,8\n"2024-03-01 18:00:00",Legs,1h 5m,Squat,2,225,5,9\n"2024-03-01 18:00:00",Legs,1h 5m,Zorb Squat,1,180,10,\n';
     const res = await r.importSetsCSV(csv, 'lb');
-    expect(res).toMatchObject({ sessions: 1, sets: 3, newExercises: ['Belt Squat'] });
+    expect(res).toMatchObject({ sessions: 1, sets: 3, newExercises: ['Zorb Squat'] });
     const h = await r.exerciseHistory(SQUAT); // "squat" matches the alias on Back Squat
     expect(Math.round(h[0].heaviest * 2.2046226218)).toBe(225);
     const s = (await db.sessions.toArray())[0];
@@ -193,5 +193,29 @@ describe('CSV import', () => {
   });
   it('rejects a file without the needed columns', async () => {
     await expect(r.importSetsCSV('foo,bar\n1,2', 'kg')).rejects.toThrow(/date, exercise and reps/);
+  });
+});
+
+describe('exercise library', () => {
+  it('loads the big library once, alongside the core list, without duplicates', async () => {
+    const n = await db.exercises.count();
+    expect(n).toBeGreaterThan(650);
+    const names = (await db.exercises.toArray()).map((e) => e.name.toLowerCase());
+    expect(new Set(names).size).toBe(names.length);
+    expect((await db.settings.get('me'))!.librarySeeded).toBe(r.LIBRARY_VERSION);
+    await r.ensureSeeded();
+    expect(await db.exercises.count()).toBe(n);
+    const pendlay = (await r.searchExercises({ q: 'pendlay' }))[0];
+    expect(pendlay.name).toBe('Pendlay Row');
+    const withSteps = (await db.exercises.toArray()).filter((e) => e.steps?.length);
+    expect(withSteps.length).toBeGreaterThan(400);
+  });
+  it('existing devices get the library on upgrade and keep their data', async () => {
+    const custom = await r.saveExercise({ name: 'My Press', primaryMuscles: ['chest'] });
+    await db.exercises.where('id').startsWith('g-').delete();
+    await r.updateSettings({ librarySeeded: 0 });
+    await r.ensureSeeded();
+    expect(await db.exercises.get(custom.id)).toBeTruthy();
+    expect(await db.exercises.where('id').startsWith('g-').count()).toBeGreaterThan(400);
   });
 });

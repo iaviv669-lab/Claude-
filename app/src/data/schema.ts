@@ -14,7 +14,7 @@ export type Equipment =
   | 'barbell' | 'dumbbell' | 'kettlebell' | 'machine' | 'cable' | 'smith'
   | 'ez_bar' | 'trap_bar' | 'band' | 'pullup_bar' | 'dip_bars' | 'bench' | 'bodyweight';
 export type ExerciseType =
-  | 'compound_upper' | 'compound_lower' | 'isolation_upper' | 'isolation_lower' | 'core';
+  | 'compound_upper' | 'compound_lower' | 'isolation_upper' | 'isolation_lower' | 'core' | 'cardio';
 export type Laterality = 'bilateral' | 'unilateral' | 'asymmetrical' | 'both';
 export type TrackedMetric = 'weight_reps' | 'reps' | 'time' | 'distance';
 export type MovementPattern =
@@ -39,6 +39,7 @@ export interface Settings extends Row {
   prefill: 'previous' | 'targets';
   suggestProgression?: boolean;   // default on
   loudAlert?: boolean;            // repeat the rest beep
+  librarySeeded?: number;         // version of the big exercise library added to this device
   restDefaults: Record<ExerciseType, number>; // seconds, e.g. compound_lower 180, isolation_upper 90
   warmupAutomation: 'off' | 'smart';
   warmupScheme: WarmupStep[]; // e.g. [{pct:.4,reps:8},{pct:.6,reps:5},{pct:.8,reps:3}]
@@ -64,6 +65,7 @@ export interface Exercise extends Row {
   notes: string;              // our own short cue, or the user's
   restOverrideSec: number | null;
   warmupOverride: WarmupStep[] | null;
+  steps?: string[];           // how-to instructions (library exercises)
 }
 
 export interface GymProfile extends Row {

@@ -93,6 +93,11 @@ export default function Settings() {
             if (await confirmDialog({ title: 'Delete all data?', body: 'Workouts, exercises, gyms and settings will be erased from this device. This can’t be undone.', ok: 'Delete everything', danger: true })) { await repo.deleteAllData(); location.reload(); }
           }}>Delete all data</Button>
         </Card>
+        <SectionTitle>Credits</SectionTitle>
+        <Card className="space-y-2 text-xs text-muted">
+          <p>Exercise library includes the open exercise library by Achref Thamri (gymdeck-exercises), used under the MIT License: Copyright (c) 2026 Achref Thamri. Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files, to deal in the Software without restriction, subject to including this notice. The software is provided “as is”, without warranty of any kind.</p>
+          <p>Logo lettering: Barlow Condensed by The Barlow Project Authors, SIL Open Font License 1.1. Icons: Lucide (ISC).</p>
+        </Card>
         <p className="mt-6 text-center text-xs text-muted">{APP_NAME} · works offline · <button className="underline" onClick={() => nav('/design')}>design system</button></p>
       </Page>
 
@@ -109,9 +114,9 @@ function RestDefaults({ open, onClose, value }: { open: boolean; onClose: () => 
       {(Object.keys(TYPE_LABEL) as ExerciseType[]).map((k) => (
         <div key={k} className="flex items-center gap-3 py-2">
           <span className="flex-1">{TYPE_LABEL[k]}</span>
-          <Button size="sm" onClick={() => setV({ ...v, [k]: Math.max(15, v[k] - 15) })}>−</Button>
-          <span className="num w-12 text-center">{fmtClock(v[k])}</span>
-          <Button size="sm" onClick={() => setV({ ...v, [k]: Math.min(600, v[k] + 15) })}>+</Button>
+          <Button size="sm" onClick={() => setV({ ...v, [k]: Math.max(15, (v[k] ?? 60) - 15) })}>−</Button>
+          <span className="num w-12 text-center">{fmtClock(v[k] ?? 60)}</span>
+          <Button size="sm" onClick={() => setV({ ...v, [k]: Math.min(600, (v[k] ?? 60) + 15) })}>+</Button>
         </div>
       ))}
       <p className="mt-2 text-xs text-muted">An exercise’s own rest (set in the exercise or the workout) wins over these.</p>

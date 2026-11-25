@@ -1,11 +1,11 @@
 import { useMemo, useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { Check, Plus, Search } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
 import { db, type Id, type Muscle } from '../data/schema';
 import { matchExercise } from '../data/repo';
 import { ALL_MUSCLES, EQUIPMENT_LABEL, MUSCLE_LABEL } from '../data/seed';
-import { Button, Chip, Sheet, inputCls } from './ui';
+import { Button, Chip, Sheet, inputCls, toast } from './ui';
+import { ExerciseFields, useExerciseDraft } from './ExerciseForm';
 
 /** S06. Multi-select (or single when `single`) exercise picker. */
 export function ExercisePicker({ open, onClose, onPick, single, title = 'Add exercises', gymId }: { open: boolean; onClose: () => void; onPick: (ids: Id[]) => void; single?: boolean; title?: string; gymId?: Id | null }) {
@@ -13,7 +13,7 @@ export function ExercisePicker({ open, onClose, onPick, single, title = 'Add exe
   const [muscle, setMuscle] = useState<Muscle | null>(null);
   const [gymOnly, setGymOnly] = useState(true);
   const [picked, setPicked] = useState<Id[]>([]);
-  const nav = useNavigate();
+  const [creating, setCreating] = useState<string | null>(null);
   const all = useLiveQuery(() => db.exercises.toArray(), []);
   const gym = useLiveQuery(() => (gymId ? db.gyms.get(gymId) : undefined), [gymId]);
   const list = useMemo(() => (all ?? [])
@@ -42,7 +42,7 @@ export function ExercisePicker({ open, onClose, onPick, single, title = 'Add exe
           {ALL_MUSCLES.filter((m) => m !== 'neck').map((m) => <Chip key={m} on={muscle === m} onClick={() => setMuscle(muscle === m ? null : m)}>{MUSCLE_LABEL[m]}</Chip>)}
         </div>
       </div>
-      <button className="mb-1 flex min-h-12 w-full items-center gap-3 rounded-md px-2 text-left text-accent active:bg-surface-2" onClick={() => { close(); nav(`/exercise/new${q ? `?name=${encodeURIComponent(q)}` : ''}`); }}>
+      <button className="mb-1 flex min-h-12 w-full items-center gap-3 rounded-md px-2 text-left text-accent active:bg-surface-2" onClick={() => setCreating(q)}>
         <Plus size={20} /> <span className="font-semibold">{q ? `Create “${q}”` : 'Create custom exercise'}</span>
       </button>
       {all && list.length === 0 ? <p className="py-6 text-center text-sm text-muted">No exercises match. Try another word, or create it.</p> : null}
@@ -63,6 +63,26 @@ export function ExercisePicker({ open, onClose, onPick, single, title = 'Add exe
           );
         })}
       </ul>
+      {creating != null ? (
+        <CreateExerciseSheet initialName={creating} onClose={() => setCreating(null)} onCreated={(id) => {
+          setCreating(null);
+          setQ('');
+          if (single) { onPick([id]); close(); } else setPicked((p) => [...p, id]);
+          toast(single ? 'Exercise created' : 'Exercise created and selected');
+        }} />
+      ) : null}
+    </Sheet>
+  );
+}
+
+/** Create a custom exercise on top of the picker, without leaving the current screen. */
+function CreateExerciseSheet({ initialName, onClose, onCreated }: { initialName: string; onClose: () => void; onCreated: (id: Id) => void }) {
+  const draft = useExerciseDraft(undefined, initialName);
+  return (
+    <Sheet open onClose={onClose} title="New exercise" footer={
+      <Button variant="primary" block size="lg" onClick={async () => { const saved = await draft.save(); if (saved) onCreated(saved.id); }}>Create exercise</Button>
+    }>
+      <ExerciseFields draft={draft} autoFocus />
     </Sheet>
   );
 }

@@ -61,6 +61,14 @@ export default function ExerciseDetail() {
           <div className="mt-2 flex justify-center gap-1.5">{RANGES.map((r) => <Chip key={r.id} on={range === r.id} onClick={() => setRange(r.id)}>{r.label}</Chip>)}</div>
           {m.weight ? <p className="mt-2 text-center text-xs text-muted">in {unit}{metric.startsWith('e') ? ' · estimated from your best set (Epley), sets over 12 reps excluded' : ''}</p> : null}
         </Card>
+        {ex.steps?.length ? (
+          <>
+            <SectionTitle>How to do it</SectionTitle>
+            <Card className="text-sm">
+              <ol className="list-decimal space-y-2 pl-5">{ex.steps.map((s, i) => <li key={i}>{s}</li>)}</ol>
+            </Card>
+          </>
+        ) : null}
         <SectionTitle>About</SectionTitle>
         <Card className="space-y-1 text-sm">
           <p><span className="text-muted">Main: </span>{ex.primaryMuscles.map((x) => MUSCLE_LABEL[x]).join(', ') || '—'}</p>

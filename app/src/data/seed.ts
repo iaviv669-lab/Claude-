@@ -33,7 +33,7 @@ const R: Row[] = [
   ['Lat Pulldown', 'compound_upper', 'vertical_pull', ['lats'], ['biceps', 'upper_back'], ['cable', 'machine'], 'bilateral', 0, ['pulldown']],
   ['Close-Grip Lat Pulldown', 'compound_upper', 'vertical_pull', ['lats'], ['biceps'], ['cable', 'machine']],
   ['Assisted Pull-Up Machine', 'compound_upper', 'vertical_pull', ['lats'], ['biceps'], ['machine']],
-  ['Barbell Row', 'compound_upper', 'horizontal_pull', ['upper_back', 'lats'], ['biceps', 'rear_delts', 'lower_back'], ['barbell'], 'bilateral', 0, ['bent over row', 'pendlay row']],
+  ['Barbell Row', 'compound_upper', 'horizontal_pull', ['upper_back', 'lats'], ['biceps', 'rear_delts', 'lower_back'], ['barbell'], 'bilateral', 0, ['bent over row']],
   ['One-Arm Dumbbell Row', 'compound_upper', 'horizontal_pull', ['lats', 'upper_back'], ['biceps', 'rear_delts'], ['dumbbell', 'bench'], 'unilateral', 0, ['db row']],
   ['Chest-Supported Row', 'compound_upper', 'horizontal_pull', ['upper_back', 'lats'], ['biceps', 'rear_delts'], ['dumbbell', 'bench'], 'bilateral', 0, ['incline row']],
   ['Seated Cable Row', 'compound_upper', 'horizontal_pull', ['upper_back', 'lats'], ['biceps', 'rear_delts'], ['cable'], 'bilateral', 0, ['cable row']],
@@ -149,7 +149,7 @@ export const EQUIPMENT_LABEL: Record<Equipment, string> = {
   ez_bar: 'EZ bar', trap_bar: 'Trap bar', band: 'Band', pullup_bar: 'Pull-up bar', dip_bars: 'Dip bars', bench: 'Bench', bodyweight: 'Bodyweight',
 };
 export const TYPE_LABEL: Record<ExerciseType, string> = {
-  compound_upper: 'Compound · upper', compound_lower: 'Compound · lower', isolation_upper: 'Isolation · upper', isolation_lower: 'Isolation · lower', core: 'Core',
+  compound_upper: 'Compound · upper', compound_lower: 'Compound · lower', isolation_upper: 'Isolation · upper', isolation_lower: 'Isolation · lower', core: 'Core', cardio: 'Cardio',
 };
 export const ALL_MUSCLES = Object.keys(MUSCLE_LABEL) as Muscle[];
 export const ALL_EQUIPMENT = Object.keys(EQUIPMENT_LABEL) as Equipment[];

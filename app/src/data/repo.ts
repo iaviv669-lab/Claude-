@@ -22,7 +22,7 @@ export const DEFAULT_SETTINGS: Omit<Settings, 'createdAt' | 'updatedAt'> = {
   keepAwake: true,
   bodyweightContribution: false,
   prefill: 'previous',
-  restDefaults: { compound_lower: 180, compound_upper: 150, isolation_lower: 90, isolation_upper: 90, core: 60 },
+  restDefaults: { compound_lower: 180, compound_upper: 150, isolation_lower: 90, isolation_upper: 90, core: 60, cardio: 60 },
   warmupAutomation: 'off',
   warmupScheme: [{ pct: 0.4, reps: 8 }, { pct: 0.6, reps: 5 }, { pct: 0.8, reps: 3 }],
   activeGymId: null,
@@ -42,6 +42,20 @@ export const plateDefaults = (unit: Unit) =>
     ? { barWeightsKg: [20, 15, 10], platesKg: [25, 20, 15, 10, 5, 2.5, 1.25], dumbbellIncrementKg: 2 }
     : { barWeightsKg: [45, 35].map((w) => toKg(w, 'lb')), platesKg: [45, 35, 25, 10, 5, 2.5].map((w) => toKg(w, 'lb')), dumbbellIncrementKg: toKg(5, 'lb') };
 
+/** Bump when src/data/library.json changes so existing devices pick up the new exercises. */
+export const LIBRARY_VERSION = 1;
+
+interface LibraryRow { id: string; name: string; type: Exercise['type']; pattern: Exercise['pattern']; primary: Muscle[]; secondary: Muscle[]; equipment: Exercise['equipment']; laterality: Exercise['laterality']; bw: number; metric: Exercise['trackedMetric']; aliases?: string[]; steps?: string[]; }
+
+export function libraryToExercise(r: LibraryRow, t: number): Exercise {
+  return {
+    id: r.id, createdAt: t, updatedAt: t, name: r.name, aliases: r.aliases ?? [], isCustom: 0, archived: 0, trackedMetric: r.metric, type: r.type,
+    laterality: r.laterality, pattern: r.pattern, primaryMuscles: r.primary, secondaryMuscles: r.secondary, equipment: r.equipment,
+    isBodyweight: r.bw > 0 || r.equipment.every((q) => q === 'bodyweight' || q === 'pullup_bar' || q === 'dip_bars'),
+    bodyweightPct: r.bw, notes: '', restOverrideSec: null, warmupOverride: null, steps: r.steps ?? [],
+  };
+}
+
 export async function ensureSeeded() {
   await db.transaction('rw', db.settings, db.exercises, async () => {
     if (!(await db.settings.get('me'))) await db.settings.put({ ...DEFAULT_SETTINGS, createdAt: now(), updatedAt: now() });
@@ -50,6 +64,17 @@ export async function ensureSeeded() {
     const missing = builtIns.filter((e) => !existing.has(e.id));
     if (missing.length) await db.exercises.bulkPut(missing);
   });
+  // The big library is loaded once per version, in its own chunk, so normal launches stay fast.
+  const s = await db.settings.get('me');
+  if ((s?.librarySeeded ?? 0) < LIBRARY_VERSION) {
+    const rows = (await import('./library.json')).default as LibraryRow[];
+    await db.transaction('rw', db.settings, db.exercises, async () => {
+      const have = new Set(await db.exercises.toCollection().primaryKeys());
+      const t = now();
+      await db.exercises.bulkPut(rows.filter((r) => !have.has(r.id)).map((r) => libraryToExercise(r, t)));
+      await db.settings.update('me', { librarySeeded: LIBRARY_VERSION });
+    });
+  }
 }
 
 export async function getSettings(): Promise<Settings> {
@@ -114,7 +139,7 @@ export async function deleteExercise(id: Id): Promise<'deleted' | 'archived'> {
   });
 }
 
-export async function suggestSwaps(exerciseId: Id, gymId: Id | null, limit = 8): Promise<Exercise[]> {
+export async function suggestSwaps(exerciseId: Id, gymId: Id | null, limit = 10): Promise<Exercise[]> {
   const ex = await db.exercises.get(exerciseId);
   if (!ex) return [];
   const gym = gymId ? await db.gyms.get(gymId) : undefined;
@@ -123,7 +148,8 @@ export async function suggestSwaps(exerciseId: Id, gymId: Id | null, limit = 8):
     .filter((e) => !gym || e.equipment.some((q) => gym.equipment.includes(q)))
     .map((e) => {
       const shared = e.primaryMuscles.filter((m) => ex.primaryMuscles.includes(m)).length;
-      const score = shared * 3 + (e.pattern === ex.pattern ? 2 : 0) + (e.type === ex.type ? 1 : 0);
+      // everyday lifts (the core list, ids x-) rank above niche library variations
+      const score = shared * 3 + (e.pattern === ex.pattern ? 2 : 0) + (e.type === ex.type ? 1 : 0) + (e.id.startsWith('x-') || e.isCustom ? 2 : 0);
       return { e, score, shared };
     })
     .filter((x) => x.shared > 0)
@@ -542,7 +568,7 @@ export async function restFor(seId: Id): Promise<number> {
     const it = await db.workoutItems.where('workoutId').equals(session.workoutId).filter((i) => i.exerciseId === se.exerciseId).first();
     itemRest = it?.restSec ?? null;
   }
-  return itemRest ?? ex?.restOverrideSec ?? (ex ? settings.restDefaults[ex.type] : 90);
+  return itemRest ?? ex?.restOverrideSec ?? (ex ? settings.restDefaults[ex.type] ?? 90 : 90);
 }
 
 /** Patch one entry of a set as an atomic read-modify-write, so quick edits to different fields never overwrite each other. */

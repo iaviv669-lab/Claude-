@@ -24,7 +24,7 @@ export default function Preview() {
   // rough estimate: 40 s per set plus rest
   const estMin = Math.round(items.reduce((a, it) => {
     const e = exs?.get(it.exerciseId);
-    const rest = it.restSec ?? e?.restOverrideSec ?? (e && settings ? settings.restDefaults[e.type] : 90);
+    const rest = it.restSec ?? e?.restOverrideSec ?? (e && settings ? settings.restDefaults[e.type] ?? 90 : 90);
     return a + it.targetSets * (40 + rest);
   }, 0) / 60);
   const start = async () => {

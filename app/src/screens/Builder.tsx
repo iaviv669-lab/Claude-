@@ -23,9 +23,22 @@ export default function Builder() {
   const [picker, setPicker] = useState(false);
   const [menuFor, setMenuFor] = useState<number | null>(null);
   const [edit, setEdit] = useState<number | null>(null);
+  const [restored, setRestored] = useState(false);
   const programId = params.get('program');
 
+  // Unsaved changes are kept on the device until you save, so leaving the screen never loses them.
+  const draftKey = `ironrow:draft:workout:${id ?? 'new'}:${programId ?? ''}:${params.get('day') ?? ''}`;
+  const clearDraft = () => { try { localStorage.removeItem(draftKey); } catch { /* storage blocked */ } };
   useEffect(() => {
+    try {
+      const raw = localStorage.getItem(draftKey);
+      if (raw) {
+        const d = JSON.parse(raw) as { name: string; gymId: string | null; items: repo.ItemDraft[] };
+        setName(d.name); setGymId(d.gymId); setItems(d.items); setLoaded(true);
+        if (d.items.length || d.name) { setRestored(true); toast('Restored your unsaved changes'); }
+        return;
+      }
+    } catch { /* no draft */ }
     if (!id) return;
     repo.getWorkout(id).then((w) => {
       if (!w) return;
@@ -33,8 +46,14 @@ export default function Builder() {
       setItems(w.items.map(({ id: iid, exerciseId, supersetGroup, targetSets, repMin, repMax, targetRir, restSec }) => ({ id: iid, exerciseId, supersetGroup, targetSets, repMin, repMax, targetRir, restSec })));
       setLoaded(true);
     });
-  }, [id]);
+  }, [id]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => { if (!id && settings && gymId == null) setGymId(settings.activeGymId); }, [id, settings, gymId]);
+  useEffect(() => {
+    if (!loaded) return;
+    try {
+      if (name || items.length) localStorage.setItem(draftKey, JSON.stringify({ name, gymId, items }));
+    } catch { /* storage blocked */ }
+  }, [loaded, name, gymId, items, draftKey]);
 
   const move = (i: number, d: -1 | 1) => setItems((it) => { const a = [...it]; [a[i], a[i + d]] = [a[i + d], a[i]]; return repo.normaliseSupersets(a); });
   const superset = (i: number, j: number) => setItems((it) => { const a = it.map((x) => ({ ...x })); const g = a[i].supersetGroup ?? a[j].supersetGroup ?? newId(); a[i].supersetGroup = g; a[j].supersetGroup = g; return a; });
@@ -42,6 +61,7 @@ export default function Builder() {
     if (!name.trim()) { toast('Give the workout a name'); return; }
     if (!items.length) { toast('Add at least one exercise'); return; }
     const wid = await repo.saveWorkout({ id, name: name.trim(), gymId, ...(programId ? { programId } : {}) }, items);
+    clearDraft();
     if (programId) {
       const p = await db.programs.get(programId);
       if (p) { const days = [...p.days]; const slot = Number(params.get('day') ?? days.indexOf(null)); if (slot >= 0 && slot < days.length) days[slot] = wid; else days.push(wid); await repo.saveProgram({ ...p, days }); }
@@ -57,6 +77,12 @@ export default function Builder() {
     <>
       <Header title={id ? 'Edit workout' : 'New workout'} back right={<Button variant="primary" size="sm" onClick={save}>Save</Button>} />
       <Page>
+        {restored ? (
+          <div className="mb-4 flex items-center gap-2 rounded-md bg-accent-soft px-3 py-2 text-sm">
+            <span className="flex-1">Unsaved changes restored.</span>
+            <Button size="sm" variant="ghost" onClick={() => { clearDraft(); if (id) location.reload(); else { setName(''); setItems([]); setRestored(false); } }}>Discard changes</Button>
+          </div>
+        ) : null}
         <div className="space-y-4">
           <Field label="Name"><input className={inputCls} value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Upper A, Leg day" autoFocus={!id} /></Field>
           {gyms && gyms.length > 1 ? (
@@ -86,7 +112,7 @@ export default function Builder() {
         </ol>
         {id ? (
           <Button variant="ghost" className="mt-8 text-danger" onClick={async () => {
-            if (await confirmDialog({ title: 'Delete this workout?', body: 'Past sessions stay in your history.', ok: 'Delete', danger: true })) { await repo.deleteWorkout(id); nav('/', { replace: true }); }
+            if (await confirmDialog({ title: 'Delete this workout?', body: 'Past sessions stay in your history.', ok: 'Delete', danger: true })) { clearDraft(); await repo.deleteWorkout(id); nav('/', { replace: true }); }
           }}><Trash2 size={16} />Delete workout</Button>
         ) : null}
       </Page>

@@ -1,6 +1,6 @@
 feature,area,priority,original,clone,notes
 First-run setup: units and default gym equipment,onboarding,must,yes,yes,S01; no account for personal use
-Seeded exercise library with search,exercises,must,yes,yes,98 of our own exercises vs their hundreds with videos
+Seeded exercise library with search,exercises,must,yes,yes,"686: 98 core + 588 library (open MIT library + our own extras), with how-to steps; no videos"
 Filter exercises by muscle / type / equipment,exercises,must,yes,yes,S06
 Create / edit / delete custom exercise,exercises,must,yes,yes,S19 fields from help article 328
 Build and save a workout (template),workouts,must,yes,yes,S05 F03
