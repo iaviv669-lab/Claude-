@@ -26,7 +26,7 @@ export function WorkoutTab() {
 
   return (
     <>
-      <Header title={<span className="block pl-2 text-accent"><Wordmark height={20} /></span>} />
+      <Header title={<span className="block pl-2 text-accent"><Wordmark height={24} /></span>} />
       <Page>
         {active ? (
           <Card className="mb-4 border-accent bg-accent-soft">

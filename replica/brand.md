@@ -73,7 +73,7 @@ The name and domain sweep is what guards against leftovers.
 
 Six drafts in `design/logo-directions.png`: A Ascent, B IR monogram, C The plate, D Logbook rows, E Loaded bar, F wordmark with plate O's.
 
-**Chosen: C + F, then the icon changed to a barbell (owner's request).** A level side-view barbell (sleeves, two plates a side, collars) is the app icon: **purple-gradient barbell (#b9a4ff → #7a4cf5 → #5a2fd6) on black (#0a0a0c)**, chosen over a black barbell on purple; white on the brand gradient (135°: #5a2fd6 → #2a1173 → #0e0826); the IRONROW wordmark with plate O's is used on the welcome screen and the home header. Letters are outlined from Inter Display Black (SIL Open Font License) so no font loads at runtime. Source of truth: `app/scripts/make-logo.py` → `app/src/components/Logo.tsx`, `app/public/icon.svg`; PNG icons rendered from the SVG.
+**Chosen: C + F, then the icon changed to a barbell (owner's request).** A level side-view barbell (sleeves, two plates a side, collars) is the app icon: **purple-gradient barbell (#b9a4ff → #7a4cf5 → #5a2fd6) on black (#0a0a0c)**, chosen over a black barbell on purple; white on the brand gradient (135°: #5a2fd6 → #2a1173 → #0e0826); the wordmark (welcome screen, home header) is **IRONROW in Barlow Condensed ExtraBold Italic**, plain letters, chosen by the owner over the plate-O version. Letters are outlined from the font (SIL Open Font License, copy and licence in `app/scripts/fonts/`) so no font loads at runtime. Source of truth: `app/scripts/make-logo.py` → `app/src/components/Logo.tsx`, `app/public/icon.svg`; PNG icons rendered from the SVG.
 
 ## Logo brief
 

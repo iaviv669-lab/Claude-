@@ -14,7 +14,7 @@ export function Onboarding() {
     <main className="mx-auto flex min-h-full max-w-app flex-col pb-10">
       <div className="brand-gradient pt-safe-10 -mb-2 rounded-b-lg px-5 pb-8 text-white">
         <AppIcon size={64} className="drop-shadow-lg" />
-        <h1 className="mt-5"><Wordmark height={30} /></h1>
+        <h1 className="mt-5"><Wordmark height={38} /></h1>
         <p className="mt-2 text-base text-white/85">{TAGLINE}</p>
       </div>
       <div className="h-8" />
